@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a12">
+<meta name="description" content="Lyric Bridge + Beat Calculator: de la letra de tu canción a un videoclip con IA. Gratis, local y bilingüe. By Seny Clever.">
+<title>AI Music Video Suite · By Seny Clever</title>
+<style>
+:root{--bg:#0a0a12;--panel:#12121f;--panel2:#181828;--border:#2a2a45;--cyan:#00e5ff;--magenta:#ff2e88;--green:#39ff8e;--amber:#ffb454;--txt:#d8d8e8;--dim:#8888a8;--mono:'Consolas','Courier New',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;line-height:1.6}
+a{color:var(--cyan);text-decoration:none}
+header{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 20px;background:linear-gradient(180deg,#0e0e1a,#0a0a12);border-bottom:1px solid var(--border)}
+.brand h1{font-size:16px;color:var(--cyan);text-shadow:0 0 12px rgba(0,229,255,.35)}
+.brand span{font-size:11px;color:var(--dim)}
+button{background:var(--panel2);border:1px solid var(--border);color:var(--txt);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-family:inherit}
+button:hover{border-color:var(--cyan);color:var(--cyan)}
+main{max-width:1080px;margin:0 auto;padding:24px 18px 40px}
+.hero{text-align:center;padding:34px 0 10px}
+.kicker{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--magenta);margin-bottom:10px}
+.hero h2{font-size:clamp(24px,4.5vw,40px);line-height:1.2;background:linear-gradient(90deg,var(--cyan),var(--magenta));-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:12px}
+.hero p{max-width:660px;margin:0 auto 18px;color:var(--dim)}
+.cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+.cta a{display:inline-flex;align-items:center;gap:6px;padding:12px 20px;border-radius:10px;border:1px solid var(--cyan);color:var(--cyan);background:rgba(0,229,255,.10);font-weight:600}
+.cta a.alt{border-color:var(--magenta);color:var(--magenta);background:rgba(255,46,136,.10)}
+.cta a:hover{filter:brightness(1.25)}
+.badges{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.badge{font-size:11px;color:var(--dim);border:1px solid var(--border);border-radius:20px;padding:4px 10px;background:var(--panel)}
+section{margin-top:34px}
+h2.sec{font-size:18px;color:var(--cyan);margin-bottom:14px}
+.pipe{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.step{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px}
+.step b{display:block;font-size:13px;margin:6px 0 2px}
+.step small{color:var(--dim);font-size:11px;line-height:1.4;display:block}
+.step .n{display:inline-flex;width:20px;height:20px;border-radius:50%;background:rgba(0,229,255,.15);color:var(--cyan);font-size:11px;align-items:center;justify-content:center;font-family:var(--mono)}
+.apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.app{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.app.a1{border-top:3px solid var(--cyan)}
+.app.a2{border-top:3px solid var(--magenta)}
+.tag{align-self:flex-start;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);border:1px solid var(--border);border-radius:20px;padding:3px 9px}
+.app h3{font-size:17px}
+.app p{color:var(--dim);font-size:13px}
+.app ul{list-style:none;display:flex;flex-direction:column;gap:5px;font-size:13px;flex:1}
+.app .open{display:block;text-align:center;padding:12px;border-radius:10px;font-weight:700;border:1px solid var(--cyan);color:var(--cyan);background:rgba(0,229,255,.10)}
+.app.a2 .open{border-color:var(--magenta);color:var(--magenta);background:rgba(255,46,136,.10)}
+.app .open:hover{filter:brightness(1.25)}
+.warnbox{background:rgba(255,180,84,.08);border-left:4px solid var(--amber);border-radius:0 10px 10px 0;padding:14px 16px;margin-top:14px}
+.warnbox b{color:var(--amber);display:block;margin-bottom:4px;font-size:14px}
+.warnbox p{font-size:13px}
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.feat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px}
+.feat b{display:block;font-size:14px;margin-bottom:4px}
+.feat small{color:var(--dim);font-size:12px;line-height:1.5;display:block}
+.qs{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
+.qs ol{margin:0 0 12px 20px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.tipbox{background:rgba(57,255,142,.07);border-left:4px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:var(--green)}
+footer{border-top:1px solid var(--border);margin-top:40px;padding:20px;text-align:center;color:var(--dim);font-size:12px;display:flex;flex-direction:column;gap:10px;align-items:center}
+footer .docs{border:1px solid var(--border);border-radius:8px;padding:8px 16px;color:var(--txt)}
+footer .docs:hover{border-color:var(--cyan);color:var(--cyan)}
+@media(max-width:560px){header{padding:10px 14px}.brand h1{font-size:14px}}
+</style>
+</head>
+<body>
+<header>
+<div class="brand"><h1>🎬 AI Music Video Suite</h1><span>By Seny Clever · v1</span></div>
+<button id="btnLang" onclick="toggleLang()">🌐 EN</button>
+</header>
+<main>
+<div class="hero">
+<div class="kicker" data-i18n="kicker">Puente Lírico 🌉 + Beat Calculator ⚡</div>
+<h2 data-i18n="heroTitle">De la letra de tu canción a un videoclip con IA</h2>
+<p data-i18n="heroSub">Dos aplicaciones gratuitas, locales y bilingües que trabajan en equipo: tú pones la canción y la letra; la suite se encarga del ritmo, el guion cinematográfico y la exportación para tu IA de video.</p>
+<div class="cta">
+<a href="./apps/lyric-bridge/" data-i18n="cta1">🌉 Abrir Puente Lírico</a>
+<a class="alt" href="./apps/beat-calculator/" data-i18n="cta2">⚡ Abrir Beat Calculator</a>
+</div>
+<div class="badges">
+<span class="badge" data-i18n="b1">🔒 100% local</span>
+<span class="badge" data-i18n="b2">🆓 Gratis · sin anuncios</span>
+<span class="badge" data-i18n="b3">🌐 Español / English</span>
+<span class="badge" data-i18n="b4">🧩 Sin instalación</span>
+</div>
+</div>
+
+<section>
+<h2 class="sec" data-i18n="pipeTitle">🔗 El flujo de trabajo</h2>
+<div class="pipe">
+<div class="step"><span class="n">1</span><b data-i18n="s1t">🎵 Tu canción</b><small data-i18n="s1d">Letra, audio y BPM</small></div>
+<div class="step"><span class="n">2</span><b data-i18n="s2t">🌉 Puente Lírico</b><small data-i18n="s2d">Timing, energía y Prompt Maestro</small></div>
+<div class="step"><span class="n">3</span><b data-i18n="s3t">🤖 Cualquier IA</b><small data-i18n="s3d">Devuelve el guion en .json</small></div>
+<div class="step"><span class="n">4</span><b data-i18n="s4t">⚡ Beat Calculator</b><small data-i18n="s4d">Revisa, corrige y afina</small></div>
+<div class="step"><span class="n">5</span><b data-i18n="s5t">📄 Informe + 🎞 marcadores</b><small data-i18n="s5d">Dirección de producción completa</small></div>
+<div class="step"><span class="n">6</span><b data-i18n="s6t">🎥 Tu IA de video</b><small data-i18n="s6d">Genera los clips y monta</small></div>
+</div>
+</section>
+
+<section>
+<h2 class="sec" data-i18n="appsTitle">🧰 Las dos herramientas</h2>
+<div class="apps">
+<div class="app a1">
+<span class="tag" data-i18n="a1tag">📱 Móvil + PC</span>
+<h3 data-i18n="a1name">🌉 Puente Lírico · Lyric Bridge</h3>
+<p data-i18n="a1desc">Carga tu canción, fija el BPM (o márcalo con tap-tap), escribe la letra sobre la rejilla musical y exporta un Prompt Maestro listo para cualquier IA.</p>
+<ul>
+<li data-i18n="a1f1">🥁 Tap tempo + rejilla beat / compás / frase</li>
+<li data-i18n="a1f2">🎵 Timeline táctil con zoom hasta 50×</li>
+<li data-i18n="a1f3">⚡ Energía por línea (E0–E3) y auto-flow</li>
+<li data-i18n="a1f4">🎬 Modo Director + Prompt Maestro bilingüe</li>
+</ul>
+<a class="open" href="./apps/lyric-bridge/" data-i18n="open">Abrir app →</a>
+</div>
+<div class="app a2">
+<span class="tag" data-i18n="a2tag">🖥️ Estación de trabajo</span>
+<h3 data-i18n="a2name">⚡ Beat Calculator for AI Video</h3>
+<p data-i18n="a2desc">Importa el JSON de tu IA (o crea el guion desde cero), revísalo en un timeline profesional de 4 bandas y exporta el informe de producción y los marcadores para tu editor.</p>
+<ul>
+<li data-i18n="a2f1">🎬 Secciones → Escenas → Clips con techo duro</li>
+<li data-i18n="a2f2">🔗 First-Last-Frame y continuidad cruzada</li>
+<li data-i18n="a2f3">🎨 Estéticas en cascada: clip → escena → sección</li>
+<li data-i18n="a2f4">🎞 Marcadores ×7: YouTube, Resolve, Blender…</li>
+</ul>
+<a class="open" href="./apps/beat-calculator/" data-i18n="open">Abrir app →</a>
+</div>
+</div>
+<div class="warnbox"><b data-i18n="warnT">⚠ Regla de oro</b><p data-i18n="warnD">Tras importar en Beat Calculator el JSON generado por tu IA, NO pulses 🔄 Actualizar ni 🎬 Generar clips: re-particionaría el guion. Los clips ya llegan calculados con ids y frames exactos.</p></div>
+</section>
+
+<section>
+<h2 class="sec" data-i18n="featTitle">✨ Por qué te va a gustar</h2>
+<div class="feats">
+<div class="feat"><b data-i18n="f1t">🔒 Privacidad total</b><small data-i18n="f1d">Todo ocurre en tu navegador: sin servidores, sin cuentas, sin subidas. Tu música nunca sale de tu equipo.</small></div>
+<div class="feat"><b data-i18n="f2t">🆓 Gratis y sin anuncios</b><small data-i18n="f2d">Código abierto (MIT). Sin pagos, sin trucos, sin publicidad.</small></div>
+<div class="feat"><b data-i18n="f3t">🌐 Bilingüe</b><small data-i18n="f3d">Interfaz, informes, prompts y manual en Español e Inglés.</small></div>
+<div class="feat"><b data-i18n="f4t">🧩 Un archivo por app</b><small data-i18n="f4d">HTML autocontenido, sin dependencias ni compilación. Ábrelo y listo.</small></div>
+<div class="feat"><b data-i18n="f5t">💾 Respaldos reales</b><small data-i18n="f5d">Letras en .txt y guiones en .json: tus proyectos son tuyos para siempre.</small></div>
+<div class="feat"><b data-i18n="f6t">🎨 Más que videoclips</b><small data-i18n="f6d">Cuaderno de letras, planificador de guiones o cualquier pieza audiovisual.</small></div>
+</div>
+</section>
+
+<section>
+<h2 class="sec" data-i18n="qsTitle">🚀 Inicio rápido</h2>
+<div class="qs">
+<ol>
+<li data-i18n="q1">Abre el Puente Lírico, carga tu audio, fija el BPM y pega tu letra con encabezados [Sección].</li>
+<li data-i18n="q2">Exporta el Prompt Maestro, pégalo en tu IA favorita y guarda el JSON que te devuelve.</li>
+<li data-i18n="q3">Importa ese JSON en Beat Calculator, revisa el guion y exporta el informe + marcadores.</li>
+</ol>
+<div class="tipbox" data-i18n="qTip">💡 ¿Sin internet? Descarga el ZIP del repositorio y abre index.html: toda la suite funciona offline.</div>
+</div>
+</section>
+</main>
+<footer>
+<a class="docs" id="docsLink" href="./README.es.md" target="_blank" rel="noopener" data-i18n="docs">📚 Documentación completa</a>
+<span data-i18n="foot">Hecho con ❤️ para creadores · By Seny Clever · v1 · Licencia MIT</span>
+</footer>
+<script>
+var I18N={es:{
+kicker:'Puente Lírico 🌉 + Beat Calculator ⚡',heroTitle:'De la letra de tu canción a un videoclip con IA',
+heroSub:'Dos aplicaciones gratuitas, locales y bilingües que trabajan en equipo: tú pones la canción y la letra; la suite se encarga del ritmo, el guion cinematográfico y la exportación para tu IA de video.',
+cta1:'🌉 Abrir Puente Lírico',cta2:'⚡ Abrir Beat Calculator',
+b1:'🔒 100% local',b2:'🆓 Gratis · sin anuncios',b3:'🌐 Español / English',b4:'🧩 Sin instalación',
+pipeTitle:'🔗 El flujo de trabajo',
+s1t:'🎵 Tu canción',s1d:'Letra, audio y BPM',s2t:'🌉 Puente Lírico',s2d:'Timing, energía y Prompt Maestro',
+s3t:'🤖 Cualquier IA',s3d:'Devuelve el guion en .json',s4t:'⚡ Beat Calculator',s4d:'Revisa, corrige y afina',
+s5t:'📄 Informe + 🎞 marcadores',s5d:'Dirección de producción completa',s6t:'🎥 Tu IA de video',s6d:'Genera los clips y monta',
+appsTitle:'🧰 Las dos herramientas',a1tag:'📱 Móvil + PC',a1name:'🌉 Puente Lírico · Lyric Bridge',
+a1desc:'Carga tu canción, fija el BPM (o márcalo con tap-tap), escribe la letra sobre la rejilla musical y exporta un Prompt Maestro listo para cualquier IA.',
+a1f1:'🥁 Tap tempo + rejilla beat / compás / frase',a1f2:'🎵 Timeline táctil con zoom hasta 50×',
+a1f3:'⚡ Energía por línea (E0–E3) y auto-flow',a1f4:'🎬 Modo Director + Prompt Maestro bilingüe',
+a2tag:'🖥️ Estación de trabajo',a2name:'⚡ Beat Calculator for AI Video',
+a2desc:'Importa el JSON de tu IA (o crea el guion desde cero), revísalo en un timeline profesional de 4 bandas y exporta el informe de producción y los marcadores para tu editor.',
+a2f1:'🎬 Secciones → Escenas → Clips con techo duro',a2f2:'🔗 First-Last-Frame y continuidad cruzada',
+a2f3:'🎨 Estéticas en cascada: clip → escena → sección',a2f4:'🎞 Marcadores ×7: YouTube, Resolve, Blender…',
+open:'Abrir app →',warnT:'⚠ Regla de oro',
+warnD:'Tras importar en Beat Calculator el JSON generado por tu IA, NO pulses 🔄 Actualizar ni 🎬 Generar clips: re-particionaría el guion. Los clips ya llegan calculados con ids y frames exactos.',
+featTitle:'✨ Por qué te va a gustar',
+f1t:'🔒 Privacidad total',f1d:'Todo ocurre en tu navegador: sin servidores, sin cuentas, sin subidas. Tu música nunca sale de tu equipo.',
+f2t:'🆓 Gratis y sin anuncios',f2d:'Código abierto (MIT). Sin pagos, sin trucos, sin publicidad.',
+f3t:'🌐 Bilingüe',f3d:'Interfaz, informes, prompts y manual en Español e Inglés.',
+f4t:'🧩 Un archivo por app',f4d:'HTML autocontenido, sin dependencias ni compilación. Ábrelo y listo.',
+f5t:'💾 Respaldos reales',f5d:'Letras en .txt y guiones en .json: tus proyectos son tuyos para siempre.',
+f6t:'🎨 Más que videoclips',f6d:'Cuaderno de letras, planificador de guiones o cualquier pieza audiovisual.',
+qsTitle:'🚀 Inicio rápido',
+q1:'Abre el Puente Lírico, carga tu audio, fija el BPM y pega tu letra con encabezados [Sección].',
+q2:'Exporta el Prompt Maestro, pégalo en tu IA favorita y guarda el JSON que te devuelve.',
+q3:'Importa ese JSON en Beat Calculator, revisa el guion y exporta el informe + marcadores.',
+qTip:'💡 ¿Sin internet? Descarga el ZIP del repositorio y abre index.html: toda la suite funciona offline.',
+docs:'📚 Documentación completa',foot:'Hecho con ❤️ para creadores · By Seny Clever · v1 · Licencia MIT'},
+en:{
+kicker:'Lyric Bridge 🌉 + Beat Calculator ⚡',heroTitle:'From your song’s lyrics to an AI-generated music video',
+heroSub:'Two free, local, bilingual apps that work as one team: you bring the song and the lyrics; the suite handles rhythm, the cinematic script and the export for your video AI.',
+cta1:'🌉 Open Lyric Bridge',cta2:'⚡ Open Beat Calculator',
+b1:'🔒 100% local',b2:'🆓 Free · no ads',b3:'🌐 Español / English',b4:'🧩 No install',
+pipeTitle:'🔗 The workflow',
+s1t:'🎵 Your song',s1d:'Lyrics, audio and BPM',s2t:'🌉 Lyric Bridge',s2d:'Timing, energy & Master Prompt',
+s3t:'🤖 Any AI',s3d:'Returns the script as .json',s4t:'⚡ Beat Calculator',s4d:'Review, fix and refine',
+s5t:'📄 Report + 🎞 markers',s5d:'Complete production direction',s6t:'🎥 Your video AI',s6d:'Generate the clips and edit',
+appsTitle:'🧰 The two tools',a1tag:'📱 Mobile + desktop',a1name:'🌉 Lyric Bridge · Puente Lírico',
+a1desc:'Load your song, set the BPM (or tap it), write the lyrics on the musical grid and export a Master Prompt ready for any AI.',
+a1f1:'🥁 Tap tempo + beat / bar / phrase grid',a1f2:'🎵 Touch-friendly timeline, zoom up to 50×',
+a1f3:'⚡ Per-line energy (E0–E3) and auto-flow',a1f4:'🎬 Director Mode + bilingual Master Prompt',
+a2tag:'🖥️ Workstation',a2name:'⚡ Beat Calculator for AI Video',
+a2desc:'Import your AI’s JSON (or build a script from scratch), review it on a professional 4-band timeline and export the production report and markers for your editor.',
+a2f1:'🎬 Sections → Scenes → Clips with a hard ceiling',a2f2:'🔗 First-Last-Frame and cross-appearance continuity',
+a2f3:'🎨 Cascading aesthetics: clip → scene → section',a2f4:'🎞 7 marker formats: YouTube, Resolve, Blender…',
+open:'Open app →',warnT:'⚠ Golden rule',
+warnD:'After importing your AI-generated JSON into Beat Calculator, do NOT press 🔄 Update or 🎬 Generate clips: it would re-partition the script. Clips already arrive computed with exact ids and frames.',
+featTitle:'✨ Why you’ll like it',
+f1t:'🔒 Total privacy',f1d:'Everything runs in your browser: no servers, no accounts, no uploads. Your music never leaves your machine.',
+f2t:'🆓 Free, no ads',f2d:'Open source (MIT). No payments, no tricks, no advertising.',
+f3t:'🌐 Bilingual',f3d:'UI, reports, prompts and manual in Spanish and English.',
+f4t:'🧩 One file per app',f4d:'Self-contained HTML, no dependencies, no build step. Just open it.',
+f5t:'💾 Real backups',f5d:'Lyrics as .txt and scripts as .json: your projects stay yours forever.',
+f6t:'🎨 Beyond music videos',f6d:'A lyric notebook, a script planner, or any audiovisual piece.',
+qsTitle:'🚀 Quick start',
+q1:'Open Lyric Bridge, load your audio, set the BPM and paste your lyrics with [Section] headers.',
+q2:'Export the Master Prompt, paste it into your favorite AI and save the JSON it returns.',
+q3:'Import that JSON into Beat Calculator, review the script and export the report + markers.',
+qTip:'💡 Offline? Download the repository ZIP and open index.html: the whole suite works offline.',
+docs:'📚 Full documentation',foot:'Made with ❤️ for creators · By Seny Clever · v1 · MIT License'}};
+var LANG='es';try{LANG=localStorage.getItem('suite_lang')||'es';}catch(e){}
+function t(k){return(I18N[LANG]&&I18N[LANG][k])||I18N.es[k]||k;}
+function repoUrl(){var h=location.hostname;if(/\.github\.io$/.test(h)){var u=h.split('.')[0];var s=location.pathname.split('/').filter(Boolean);return s.length?'https://github.com/'+u+'/'+s[0]:'https://github.com/'+u;}return null;}
+function applyLang(){document.documentElement.lang=LANG;
+document.getElementById('btnLang').textContent=LANG==='es'?'🌐 EN':'🌐 ES';
+document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.getAttribute('data-i18n'));});
+var d=document.getElementById('docsLink'),r=repoUrl();
+d.href=r?r:(LANG==='es'?'./README.es.md':'./README.md');}
+function toggleLang(){LANG=LANG==='es'?'en':'es';try{localStorage.setItem('suite_lang',LANG);}catch(e){}applyLang();}
+applyLang();
+</script>
+</body>
+</html>
