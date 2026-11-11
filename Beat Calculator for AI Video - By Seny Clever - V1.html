@@ -1,0 +1,1916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beat Calculator for AI Video - By Seny Clever</title>
+<style>
+/* ################################################################################
+   #  HOJA DE ESTILOS / STYLESHEET                                                #
+   #  ES: Tema cyberpunk oscuro; variables --cyan/--magenta/etc. controlan todo.  #
+   #  EN: Dark cyberpunk theme; variables --cyan/--magenta/etc. drive everything. #
+   ################################################################################ */
+:root{--bg:#0a0a12;--panel:#12121f;--panel2:#181828;--border:#2a2a45;--cyan:#00e5ff;--magenta:#ff2e88;--green:#39ff8e;--amber:#ffb454;--txt:#d8d8e8;--dim:#8888a8;--danger:#ff4d5e;--mono:'Consolas','Courier New',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.5;padding-bottom:60px}
+.mono{font-family:var(--mono)}.dim{color:var(--dim)}
+header{padding:10px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:linear-gradient(180deg,#0e0e1a,#0a0a12)}
+.hdr-title h1{font-size:16px;color:var(--cyan);text-shadow:0 0 12px rgba(0,229,255,.35)}
+.hdr-title span{font-size:10px;color:var(--dim)}
+.hdr-btns{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.statusbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 14px;margin:10px auto;max-width:1400px;font-size:12px}
+.statusbar .si{display:flex;align-items:center;gap:5px}.statusbar .sv{font-family:var(--mono);color:var(--cyan)}
+.statusbar .sw{color:var(--amber)}
+.wrap{max-width:1400px;margin:0 auto;padding:10px 20px}
+.tabs{display:flex;gap:3px;border-bottom:1px solid var(--border);margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:8px 12px;cursor:pointer;color:var(--dim);border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;transition:.15s;user-select:none;font-size:12px}
+.tab:hover{color:var(--txt)}.tab.active{color:var(--cyan);background:var(--panel);border-color:var(--border)}
+.tabpane{display:none}.tabpane.active{display:block;animation:fade .2s}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px}
+.panel h3{margin-bottom:10px;color:var(--cyan);font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dash{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--dim);background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;margin-bottom:10px}
+.dash b{color:var(--cyan);font-family:var(--mono)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:3px;min-width:120px;flex:1}
+.field label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:4px}
+input[type=text],input[type=number],select,textarea{background:var(--panel2);border:1px solid var(--border);color:var(--txt);padding:7px 9px;border-radius:6px;font-size:13px;font-family:inherit;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,229,255,.12)}
+textarea{font-family:var(--mono);font-size:12px;resize:vertical;min-height:70px}
+input[type=file]{color:var(--dim);font-size:12px;padding:5px}
+input.time-input{cursor:pointer;text-align:center;font-family:var(--mono)}
+button{background:var(--panel2);border:1px solid var(--border);color:var(--txt);padding:7px 12px;border-radius:6px;cursor:pointer;font-size:12px;transition:.15s;font-family:inherit}
+button:hover{border-color:var(--cyan);color:var(--cyan)}
+button.primary{background:rgba(0,229,255,.12);border-color:var(--cyan);color:var(--cyan)}
+button.small{padding:3px 7px;font-size:11px}
+button.active-toggle{background:rgba(57,255,142,.15);border-color:var(--green);color:var(--green)}
+input[type=radio],input[type=checkbox]{accent-color:var(--cyan);width:14px;height:14px;cursor:pointer}
+.tcard{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;user-select:none}
+.tcard.on{border-color:var(--green);background:rgba(57,255,142,.08);color:var(--green)}
+.hint{font-size:11px;color:var(--dim);margin-top:4px}
+.warnings{margin-bottom:8px}
+.warn{background:rgba(255,180,84,.08);border-left:3px solid var(--amber);padding:6px 10px;border-radius:0 6px 6px 0;margin-bottom:4px;font-size:12px;color:var(--amber)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:6px 8px;color:var(--cyan);border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase}
+td{padding:5px 8px;border-bottom:1px solid rgba(42,42,69,.5);font-family:var(--mono);font-size:11px}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--panel2);border:1px solid var(--border);border-radius:20px;padding:3px 8px;font-size:11px;margin:2px}
+.chip .x{cursor:pointer;color:var(--danger);font-weight:bold}
+.rail-group{margin-bottom:6px}
+.rail-head{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px;color:var(--cyan);padding:4px 6px;background:var(--panel2);border:1px solid var(--border);border-radius:6px;user-select:none}
+.rail-body{padding:4px 2px;display:flex;flex-wrap:wrap;gap:2px}
+.rail-chip{display:inline-flex;align-items:center;gap:4px;background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:10px;font-family:var(--mono)}
+.rail-chip button{padding:1px 5px;font-size:10px}
+.export-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.export-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.export-card h4{color:var(--cyan);font-size:12px}.export-card p{font-size:11px;color:var(--dim);flex:1}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--panel2);border:1px solid var(--green);color:var(--green);padding:10px 18px;border-radius:8px;z-index:99;opacity:0;transition:.3s;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.5);max-width:380px;font-size:13px}
+.toast.show{opacity:1}
+.tip{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:rgba(0,229,255,.15);color:var(--cyan);font-size:9px;cursor:help;flex-shrink:0}
+.js-tooltip{display:none;position:fixed;background:#1a1a2e;border:1px solid var(--cyan);color:var(--txt);padding:10px 14px;border-radius:8px;font-size:11px;white-space:pre-line;max-width:290px;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.6);pointer-events:none;line-height:1.5}
+.tl-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.tl-time{font-family:var(--mono);font-size:14px;color:var(--cyan)}
+.tl-canvas-wrap{position:relative;width:100%;background:#0d0d18;border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:crosshair;user-select:none}
+.tl-canvas-wrap canvas{display:block;width:100%}
+.tl-scrollbar{height:14px;background:var(--panel2);border:1px solid var(--border);border-radius:7px;margin-top:5px;position:relative;cursor:pointer;overflow:hidden}
+.tl-scrollbar-thumb{height:100%;background:rgba(0,229,255,.35);border-radius:7px;min-width:22px;cursor:grab;position:absolute;top:0}
+.tl-zoom{display:flex;align-items:center;gap:6px;margin-top:6px}
+.tl-zoom input[type=range]{flex:1;height:5px;-webkit-appearance:none;appearance:none;background:var(--panel2);border-radius:3px;outline:none}
+.tl-zoom input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--cyan);cursor:pointer;border:2px solid var(--bg)}
+.sec-list-item{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:7px;border-left:4px solid var(--cyan)}
+.sec-list-item h4{font-size:12px;margin-bottom:2px}
+.sec-list-item .desc{font-size:11px;color:var(--dim);margin-bottom:3px}
+.sec-list-item .meta{font-size:10px;font-family:var(--mono);color:var(--dim)}
+.scn-card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:7px;border-left:4px solid #888}
+.scn-card .tags{display:flex;gap:4px;flex-wrap:wrap;margin:4px 0}
+.scn-card .d{font-size:11px;color:var(--dim);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.scn-card .d.open{-webkit-line-clamp:unset;max-height:160px;overflow-y:auto}
+.clip-card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px}
+.clip-card h4{font-size:12px;color:var(--cyan);margin-bottom:4px}
+.clip-card .meta{font-size:10px;font-family:var(--mono);color:var(--dim);margin-bottom:6px}
+.hl{animation:hlPulse 1s ease-in-out 3}
+@keyframes hlPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,229,255,0)}50%{box-shadow:0 0 0 4px rgba(0,229,255,.7)}}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.time-picker{background:var(--panel);border:1px solid var(--cyan);border-radius:12px;padding:18px;min-width:330px;box-shadow:0 8px 32px rgba(0,0,0,.6)}
+.time-picker h4{color:var(--cyan);margin-bottom:12px;text-align:center;font-size:14px}
+.tp-columns{display:flex;gap:14px;justify-content:center;margin-bottom:12px}
+.tp-col{display:flex;flex-direction:column;align-items:center;gap:5px}
+.tp-col label{font-size:10px;color:var(--dim);text-transform:uppercase}
+.tp-col .tp-val{font-family:var(--mono);font-size:22px;color:var(--cyan);background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:7px 10px;min-width:70px;text-align:center;cursor:text;user-select:none}
+.tp-col .tp-val:focus{outline:none;border-color:var(--cyan)}
+.tp-col .tp-val input{width:60px;background:transparent;border:none;color:var(--cyan);font-family:var(--mono);font-size:22px;text-align:center}
+.tp-col .tp-arrows button{padding:3px 16px;font-size:13px}
+.tp-preview{text-align:center;font-family:var(--mono);font-size:16px;color:var(--green);margin-bottom:12px}
+.tp-buttons{display:flex;gap:8px;justify-content:center}
+.notif-panel{position:fixed;top:0;right:0;width:340px;height:100%;background:var(--panel);border-left:1px solid var(--border);z-index:150;display:none;flex-direction:column}
+.notif-panel.show{display:flex}
+.notif-panel h3{padding:12px;border-bottom:1px solid var(--border);color:var(--cyan);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.notif-list{flex:1;overflow-y:auto;padding:10px}
+.notif-item{padding:7px;border-bottom:1px solid rgba(42,42,69,.3);font-size:11px}
+.notif-item .time{color:var(--dim);font-size:10px}
+footer{text-align:center;color:var(--dim);font-size:10px;padding:14px;margin-top:14px}
+</style>
+</head>
+<body>
+<header>
+<div class="hdr-title"><h1>⚡ Beat Calculator for AI Video</h1><span>By Seny Clever · v1</span></div>
+<div class="hdr-btns">
+<button onclick="toggleLang()" id="btnLang">🌐 EN</button>
+<button onclick="toggleNotifPanel()">🔔</button>
+<button class="primary" onclick="applyUpdate()" data-i18n="btn.update">🔄 Actualizar</button>
+<button onclick="newSession()" data-i18n="btn.new">＋ Nueva</button>
+<button onclick="saveJSON()" data-i18n="btn.saveJson">💾 Guardar JSON</button>
+<button onclick="$('loadJsonFile').click()" data-i18n="btn.loadJson">📂 Cargar JSON</button>
+<input type="file" id="loadJsonFile" accept=".json" style="display:none">
+</div>
+</header>
+<div class="statusbar" id="statusBar"></div>
+<div class="wrap">
+<div class="warnings" id="warnings"></div>
+<div class="tabs" id="tabsBar"></div>
+
+<!-- ================= PESTAÑA: CONFIGURACIÓN / SETTINGS ================= -->
+<div class="tabpane" id="tab-config">
+<div class="panel">
+<h3 data-i18n="cfg.audioCsv">🎵 Audio & CSV</h3>
+<div class="row">
+<div class="field" style="flex:2"><label data-i18n="cfg.loadAudio">🎧 Cargar audio</label><input type="file" id="audioFile" accept="audio/*"></div>
+<div class="field" style="flex:2"><label data-i18n="cfg.importCsv">🥁 Importar CSV <span class="tip" data-tip-key="tip.csv">❓</span></label><input type="file" id="csvFile" accept=".csv,.txt"></div>
+</div>
+<div class="row">
+<div class="field"><label data-i18n="cfg.bpm">BPM <span class="tip" data-tip-key="tip.bpm">❓</span></label><input type="number" id="bpm" placeholder="120" min="30" max="300" step="0.1"></div>
+<div class="field"><label data-i18n="cfg.duration">Duración total <span class="tip" data-tip-key="tip.duration">❓</span></label><input type="text" class="time-input" id="totalDuration" placeholder="—"></div>
+</div>
+<div class="hint" id="csvInfo"></div>
+</div>
+<div class="panel">
+<h3 data-i18n="cfg.techTitle">🖥️ Configuración técnica</h3>
+<div class="row">
+<div class="field"><label data-i18n="cfg.resolution">Resolución</label>
+<select id="techRes" onchange="onResChange()">
+<option value="320x180">320×180</option><option value="480x270">480×270</option><option value="640x360">640×360</option>
+<option value="854x480">854×480</option><option value="960x540">960×540</option><option value="1280x720">1280×720</option>
+<option value="1366x768">1366×768</option><option value="1920x1080" selected>1920×1080</option><option value="2560x1440">2560×1440</option>
+<option value="3840x2160">3840×2160</option><option value="7680x4320">7680×4320</option><option value="512x512">512×512</option>
+<option value="768x768">768×768</option><option value="1024x1024">1024×1024</option><option value="576x1024">576×1024</option>
+<option value="720x1280">720×1280</option><option value="1080x1920">1080×1920</option><option value="custom">✏️ Custom</option>
+</select></div>
+<div class="field" id="customResField" style="display:none"><label data-i18n="cfg.customRes">Personalizada</label>
+<div style="display:flex;gap:5px;align-items:center"><input type="number" id="customW" placeholder="W" min="1" style="width:70px"><span>×</span><input type="number" id="customH" placeholder="H" min="1" style="width:70px"></div></div>
+<div class="field"><label data-i18n="cfg.fps">FPS</label><input type="number" id="techFps" value="24" min="1" max="120"></div>
+<div class="field"><label><input type="checkbox" id="cfgChk" style="margin-right:4px">CFG <span class="tip" data-tip-key="tip.cfg">❓</span></label><input type="number" id="techCfg" value="6"></div>
+<div class="field"><label><input type="checkbox" id="stepsChk" style="margin-right:4px">Steps <span class="tip" data-tip-key="tip.steps">❓</span></label><input type="number" id="techSteps" value="25"></div>
+</div>
+</div>
+<div class="panel">
+<h3 data-i18n="cfg.clipTitle">✂️ Configuración por defecto de clips <span class="tip" data-tip-key="tip.clipDefaults">❓</span></h3>
+<div class="hint" style="margin-bottom:8px" data-i18n="cfg.blockA">BLOQUE A · DURACIÓN</div>
+<div class="row">
+<div class="field"><label data-i18n="cfg.targetDur">Duración objetivo (s) <span class="tip" data-tip-key="tip.targetDur">❓</span></label><input type="number" id="gTargetDur" value="10" min="1" max="60" step="0.5"></div>
+<div class="field"><label data-i18n="cfg.overlap">Solapamiento (s) <span class="tip" data-tip-key="tip.overlap">❓</span></label><input type="number" id="gOverlapSec" value="0" min="0" max="59" step="0.5"></div>
+</div>
+<div class="hint" style="margin-bottom:8px" data-i18n="cfg.blockB">BLOQUE B · RITMO Y MÍNIMOS</div>
+<div class="row">
+<div class="field"><div class="tcard" id="tcSnap" onclick="tg('gSnap')"><input type="checkbox" id="gSnap" onclick="event.stopPropagation()"><span data-i18n="cfg.snapBeat">Ajustar al beat</span> <span class="tip" data-tip-key="tip.snapBeat">❓</span></div></div>
+<div class="field"><label data-i18n="cfg.snapThresh">Umbral (ms) <span class="tip" data-tip-key="tip.snapThresh">❓</span></label><input type="number" id="gSnapTh" value="500" min="0" max="2000" step="50"></div>
+<div class="field"><div class="tcard" id="tcMin" onclick="tg('gMinOn')"><input type="checkbox" id="gMinOn" onclick="event.stopPropagation()"><span data-i18n="cfg.minClipEn">Duración mínima</span> <span class="tip" data-tip-key="tip.minClip">❓</span></div></div>
+<div class="field"><label data-i18n="cfg.minClip">Mínimo (s)</label><input type="number" id="gMinDur" value="3" min="0.5" max="30" step="0.5"></div>
+</div>
+<div class="hint" style="margin-bottom:8px" data-i18n="cfg.blockC">BLOQUE C · CONTINUIDAD</div>
+<div class="row">
+<div class="field"><div class="tcard" id="tcFLF" onclick="tg('gFLF')"><input type="checkbox" id="gFLF" onclick="event.stopPropagation()"><span data-i18n="cfg.flf">First-Last-Frame</span> <span class="tip" data-tip-key="tip.flf">❓</span></div></div>
+</div>
+</div>
+</div>
+
+<!-- ================= PESTAÑA: LÍNEA DE TIEMPO / TIMELINE ================= -->
+<div class="tabpane" id="tab-timeline">
+<div class="panel">
+<h3 data-i18n="tl.title">🎵 Línea de Tiempo <span class="tip" data-tip-key="tip.tl">❓</span></h3>
+<div class="tl-controls">
+<button id="btnPlay" class="primary" onclick="togglePlay()">▶</button>
+<button onclick="stopPB()">⏹</button>
+<span class="tl-time" id="tlCurrentTime">00:00:000</span><span class="dim">/</span><span class="tl-time dim" id="tlTotalTime">00:00:000</span>
+<button onclick="undoAction()">↩️</button><button onclick="redoAction()">↪️</button>
+<button onclick="handleMark('sec')" data-i18n="tl.markSec">📑 Sección (M)</button>
+<button onclick="handleMark('scn')" data-i18n="tl.markScn">🎬 Escena (S)</button>
+<button onclick="handleMark('clip')" data-i18n="tl.markClip">🎞 Clip (C)</button>
+<button id="btnSnapE" onclick="tgSnap('edges')" data-i18n="tl.snapEdges">🧲 Bordes</button>
+<button id="btnSnapB" onclick="tgSnap('beats')" data-i18n="tl.snapBeats">🥁 Beats</button>
+<button id="btnLock" onclick="tgLock()" data-i18n="tl.lockD">🔒 Límite D</button>
+</div>
+<div class="tl-canvas-wrap" id="tlCanvasWrap">
+<canvas id="tlBg" height="320"></canvas>
+<canvas id="tlOverlay" height="320" style="position:absolute;top:0;left:0;pointer-events:none"></canvas>
+</div>
+<div class="tl-scrollbar" id="tlScrollbar"><div class="tl-scrollbar-thumb" id="tlScrollThumb"></div></div>
+<div class="tl-zoom"><span class="dim">🔍</span><input type="range" id="zoomSlider" min="1" max="50" step="0.1" value="1"><span class="mono dim" id="zoomLabel">1.0x</span></div>
+</div>
+<div class="panel">
+<h3 data-i18n="tl.rail">🎛️ Rail de navegación <span class="tip" data-tip-key="tip.rail">❓</span></h3>
+<div class="btn-row" style="margin-bottom:6px"><button class="small" onclick="railAll(true)" data-i18n="tl.expandAll">▸▸ Expandir</button><button class="small" onclick="railAll(false)" data-i18n="tl.collapseAll">◂◂ Colapsar</button></div>
+<div id="rail"></div>
+</div>
+</div>
+
+<!-- ================= PESTAÑA: SECCIONES / SECTIONS ================= -->
+<div class="tabpane" id="tab-sections">
+<div class="dash" id="dashSections"></div>
+<div class="panel">
+<h3 data-i18n="sec.addTitle">📑 Añadir sección</h3>
+<div class="row">
+<div class="field"><label data-i18n="sec.name">Nombre</label><input type="text" id="secName"></div>
+<div class="field" style="flex:2"><label data-i18n="sec.desc">Descripción</label><input type="text" id="secDesc"></div>
+</div>
+<div class="row">
+<div class="field"><label data-i18n="sec.mode">Modo</label><select id="secMode"><option value="time" data-i18n="sec.time">Tiempo</option><option value="beats" data-i18n="sec.beats">Beats</option></select></div>
+<div class="field" id="secTimeF1"><label data-i18n="sec.from">Desde</label><input type="text" class="time-input" id="secStart" placeholder="00:00:000"></div>
+<div class="field" id="secTimeF2"><label data-i18n="sec.to">Hasta</label><input type="text" class="time-input" id="secEnd" placeholder="00:00:000"></div>
+<div class="field" id="secBeatF1" style="display:none"><label data-i18n="sec.fromBeat">Desde #</label><input type="number" id="secStartBeat" min="1" value="1"></div>
+<div class="field" id="secBeatF2" style="display:none"><label data-i18n="sec.toBeat">Hasta #</label><input type="number" id="secEndBeat" min="1" value="16"></div>
+<button class="primary" onclick="addSection()" data-i18n="sec.add">＋ Añadir</button>
+</div>
+<div class="hint" data-i18n="sec.enterHint">💡 Enter guarda el formulario.</div>
+</div>
+<div class="panel"><h3 data-i18n="sec.listTitle">📋 Secciones</h3><div id="sectionsList"></div>
+<div class="row" style="margin-top:10px"><button class="primary" onclick="genClips()" style="flex:1;padding:10px" data-i18n="sec.genClips">🎬 Generar clips</button></div></div>
+</div>
+
+<!-- ================= PESTAÑA: ESCENAS / SCENES ================= -->
+<div class="tabpane" id="tab-scenes">
+<div class="dash" id="dashScenes"></div>
+<div class="panel">
+<h3 data-i18n="scn.libTitle">🎬 Biblioteca de Escenas <span class="tip" data-tip-key="tip.sceneLib">❓</span></h3>
+<div class="btn-row" style="margin-bottom:8px"><button onclick="openSceneEditor(-1)" data-i18n="scn.create">＋ Crear escena</button></div>
+<div id="sceneLibList"></div>
+</div>
+<div class="panel" id="sceneEditorPanel" style="display:none">
+<h3 id="sceneEditTitle">Escena</h3>
+<div class="row">
+<div class="field"><label data-i18n="scn.name">Nombre</label><input type="text" id="scnName"></div>
+<div class="field"><label data-i18n="scn.aesthetic">Estética</label><select id="scnAesthetic"></select></div>
+</div>
+<div class="field" style="margin-bottom:8px"><label data-i18n="scn.desc">Dirección visual</label><textarea id="scnDesc" rows="3"></textarea></div>
+<div class="row">
+<div class="field"><label data-i18n="scn.targetDur">Duración clip</label><select id="scnTargetMode"><option value="inherit" data-i18n="scn.inherit">Heredar</option><option value="custom" data-i18n="scn.custom">Custom</option></select></div>
+<div class="field" id="scnTargetField" style="display:none"><label>(s)</label><input type="number" id="scnTargetVal" value="8" step="0.5"></div>
+<div class="field"><label data-i18n="scn.overlap">Solapamiento</label><select id="scnOvMode"><option value="inherit" data-i18n="scn.inherit">Heredar</option><option value="custom" data-i18n="scn.custom">Custom</option></select></div>
+<div class="field" id="scnOvField" style="display:none"><label>(s)</label><input type="number" id="scnOvVal" value="0" step="0.5"></div>
+</div>
+<div class="row">
+<div class="field"><div class="tcard" onclick="ck('scnFLF')"><input type="checkbox" id="scnFLF" onclick="event.stopPropagation()"><span>First-Last-Frame</span></div></div>
+<div class="field"><div class="tcard" onclick="ck('scnCross')"><input type="checkbox" id="scnCross" onclick="event.stopPropagation()"><span data-i18n="scn.crossFLF">Continuidad entre apariciones</span> <span class="tip" data-tip-key="tip.crossFLF">❓</span></div></div>
+</div>
+<div class="btn-row"><button class="primary" onclick="saveSceneEdit()" data-i18n="scn.save">Guardar</button><button onclick="closeSceneEditor()" data-i18n="scn.cancel">Cancelar</button></div>
+</div>
+<div class="panel">
+<h3 data-i18n="scn.assignTitle">📎 Asignación a Secciones <span class="tip" data-tip-key="tip.assign">❓</span></h3>
+<div class="row">
+<div class="field"><label data-i18n="scn.selectSection">Sección</label><select id="assignSection" onchange="renderAssignments()"></select></div>
+<div class="field"><label data-i18n="scn.selectScene">Escena</label><select id="assignScene"></select></div>
+<div class="field"><label data-i18n="scn.from">Desde</label><input type="text" class="time-input" id="assignStart" placeholder="00:00:000"></div>
+<div class="field"><label data-i18n="scn.to">Hasta</label><input type="text" class="time-input" id="assignEnd" placeholder="00:00:000"></div>
+<button class="primary" onclick="addAssignment()" data-i18n="scn.assign">＋ Asignar</button>
+</div>
+<div id="assignmentList"></div>
+</div>
+</div>
+
+<!-- ================= PESTAÑA: DESCRIPCIÓN DE CLIPS ================= -->
+<div class="tabpane" id="tab-clipdesc">
+<div class="dash" id="dashCD"></div>
+<div class="panel"><h3 data-i18n="cd.title">📝 Descripción de Clips</h3><div id="clipDescList"></div></div>
+</div>
+
+<!-- ================= PESTAÑA: CREATIVO ================= -->
+<div class="tabpane" id="tab-creative">
+<div class="panel">
+<h3 data-i18n="cr.upTitle">🎬 Prompt Universal</h3>
+<div class="field" style="margin-bottom:6px"><label data-i18n="cr.upName">Título</label><input type="text" id="upTitle"></div>
+<textarea id="universalPrompt" rows="8"></textarea>
+<div class="btn-row" style="margin-top:6px"><button onclick="exportUP()" data-i18n="cr.export">⬇ Exportar</button><button onclick="$('importUPFile').click()" data-i18n="cr.import">📥 Importar</button><input type="file" id="importUPFile" accept=".txt" style="display:none"></div>
+</div>
+<div class="panel">
+<h3 data-i18n="cr.notes">📝 Bloc de notas</h3>
+<div class="btn-row" style="margin-bottom:6px"><button onclick="insertAIContext()" data-i18n="cr.aiContext">🤖 Contexto para IA</button></div>
+<textarea id="notepad" rows="4"></textarea>
+</div>
+<div class="panel">
+<h3 data-i18n="cr.aesthetics">🎨 Estéticas visuales</h3>
+<div class="btn-row" style="margin-bottom:8px"><button onclick="createAesthetic()" data-i18n="cr.create">＋ Crear</button><button onclick="$('importAestheticFile').click()" data-i18n="cr.import">📥 Importar</button><input type="file" id="importAestheticFile" accept=".txt" style="display:none"></div>
+<div id="aestheticsList"></div>
+</div>
+<div class="panel" id="aestheticEditor" style="display:none">
+<h3 id="aesEditTitle">Estética</h3>
+<div class="field" style="margin-bottom:6px"><label data-i18n="cr.name">Nombre</label><input type="text" id="aesName"></div>
+<div class="field"><label data-i18n="cr.content">Contenido</label><textarea id="aesContent" rows="5"></textarea></div>
+<div class="btn-row" style="margin-top:6px"><button class="primary" onclick="saveAestheticEdit()" data-i18n="cr.save">Guardar</button><button onclick="closeAE()" data-i18n="cr.cancel">Cancelar</button></div>
+</div>
+</div>
+
+<!-- ================= PESTAÑA: BEATS ================= -->
+<div class="tabpane" id="tab-beats">
+<div class="panel"><h3 data-i18n="beats.title">📊 Análisis de Beats</h3>
+<div class="btn-row" style="margin-bottom:8px"><button onclick="exportBeatsCSV()" data-i18n="beats.export">⬇ Exportar CSV</button></div>
+<div id="beatsStats"></div>
+<div style="max-height:460px;overflow-y:auto;margin-top:8px">
+<table><thead><tr><th>#</th><th data-i18n="beats.time">Tiempo</th><th data-i18n="beats.interval">Intervalo</th></tr></thead><tbody id="beatsBody"></tbody></table>
+</div></div>
+</div>
+
+<!-- ================= PESTAÑA: EXPORTAR ================= -->
+<div class="tabpane" id="tab-export">
+<div class="dash" id="dashExport"></div>
+<div class="panel"><h3 data-i18n="ex.project">Nombre del proyecto</h3><input type="text" id="projectName" value="Proyecto sin título"></div>
+<div class="export-grid">
+<div class="export-card"><h4 data-i18n="ex.report">📄 Informe (.txt)</h4><p data-i18n="ex.reportDesc">Contexto + guiones + parámetros.</p><div class="btn-row"><button class="primary" onclick="downloadTXT()" data-i18n="ex.download">⬇</button><button onclick="copyTXT()" data-i18n="ex.copy">📋</button></div></div>
+<div class="export-card"><h4 data-i18n="ex.json">🧾 Proyecto (.json)</h4><p data-i18n="ex.jsonDesc">Todo el proyecto.</p><div class="btn-row"><button class="primary" onclick="saveJSON()" data-i18n="ex.download">⬇</button><button onclick="$('loadJsonFile2').click()" data-i18n="ex.import">📥</button><input type="file" id="loadJsonFile2" accept=".json" style="display:none"></div></div>
+<div class="export-card"><h4 data-i18n="ex.markers">🎞️ Marcadores</h4>
+<select id="markerFormat" style="margin-bottom:6px"><option value="universal">📄 Universal</option><option value="youtube">📺 YouTube</option><option value="resolve">🎬 DaVinci</option><option value="blender">🎥 Blender</option><option value="premiere">🎞️ Premiere</option><option value="capcut">📱 CapCut</option><option value="nle">🖥️ NLE</option></select>
+<div class="btn-row"><button class="primary" onclick="downloadMarkers()" data-i18n="ex.download">⬇</button><button onclick="copyMarkers()" data-i18n="ex.copy">📋</button></div></div>
+<div class="export-card"><h4 data-i18n="ex.manual">📖 Manual</h4><p data-i18n="ex.manualDesc">Referencia absoluta.</p><div class="btn-row"><button class="primary" onclick="downloadGuide()" data-i18n="ex.downloadManual">⬇ Manual</button></div></div>
+</div>
+</div>
+</div>
+
+<!-- ================= MODAL: SELECTOR DE TIEMPO ================= -->
+<div class="modal-overlay" id="timePickerModal"><div class="time-picker"><h4 data-i18n="tp.title">⏱️ Tiempo</h4>
+<div class="tp-columns">
+<div class="tp-col"><label data-i18n="tp.min">Min</label><div class="tp-arrows"><button data-tp="min:1">▲</button></div><div class="tp-val" id="tpMin" tabindex="0" data-f="min">00</div><div class="tp-arrows"><button data-tp="min:-1">▼</button></div></div>
+<div class="tp-col"><label data-i18n="tp.sec">Seg</label><div class="tp-arrows"><button data-tp="sec:1">▲</button></div><div class="tp-val" id="tpSec" tabindex="0" data-f="sec">00</div><div class="tp-arrows"><button data-tp="sec:-1">▼</button></div></div>
+<div class="tp-col"><label data-i18n="tp.ms">Milis</label><div class="tp-arrows"><button data-tp="ms:10">▲</button></div><div class="tp-val" id="tpMs" tabindex="0" data-f="ms">000</div><div class="tp-arrows"><button data-tp="ms:-10">▼</button></div></div>
+</div>
+<div class="tp-preview" id="tpPreview">00:00:000</div>
+<div class="tp-buttons"><button class="primary" onclick="tpAccept()" data-i18n="tp.accept">✓</button><button onclick="tpCancel()" data-i18n="tp.cancel">✕</button></div>
+</div></div>
+
+<!-- ================= MODAL: NUEVA BARRA (M/S/C) ================= -->
+<!-- ES: Al marcar sección/escena/clip se pide nombre, descripción y estética.
+     EN: When marking section/scene/clip you are asked name, description, aesthetic. -->
+<div class="modal-overlay" id="markModal"><div class="time-picker" style="min-width:360px">
+<h4 id="mkTitle">Nueva barra</h4>
+<div class="hint" style="text-align:center;margin-bottom:8px" id="mkRange"></div>
+<div class="field" style="margin-bottom:6px"><label data-i18n="mk.name">Nombre</label><input type="text" id="mkName"></div>
+<div class="field" style="margin-bottom:6px"><label data-i18n="mk.desc">Descripción</label><input type="text" id="mkDesc"></div>
+<div class="field" style="margin-bottom:10px"><label data-i18n="mk.aes">Estética (aplica a esta barra)</label><select id="mkAes"></select></div>
+<div class="tp-buttons"><button class="primary" onclick="markSave()" data-i18n="tp.accept">✓</button><button onclick="markCancel()" data-i18n="tp.cancel">✕</button></div>
+<div class="hint" style="text-align:center;margin-top:8px" data-i18n="mk.enter">Enter guarda · Esc cancela</div>
+</div></div>
+
+<div class="notif-panel" id="notifPanel"><h3><span data-i18n="notif.title">🔔 Notificaciones</span><span><button class="small" onclick="clearNotifs()" data-i18n="notif.clear">Limpiar</button> <button class="small" onclick="toggleNotifPanel()">✕</button></span></h3><div class="notif-list" id="notifList"></div></div>
+<select id="aesMenu" style="position:fixed;display:none;z-index:300;width:170px"></select>
+<div class="toast" id="toast"></div>
+<div class="js-tooltip" id="jsTooltip"></div>
+<footer>Beat Calculator for AI Video — By Seny Clever · v1</footer>
+
+<script>
+/* ################################################################################
+   #  00 · CONFIGURACIÓN GLOBAL AJUSTABLE / TWEAKABLE GLOBAL CONFIG               #
+   ################################################################################ */
+const CONFIG={
+  UNDO_LIMIT:50, NOTIF_LIMIT:50, TOAST_MS:2500, HIGHLIGHT_MS:3000,
+  ZOOM_STEP:2, ZOOM_MIN:1, ZOOM_MAX:50,
+  SNAP_EDGE_MS:500, HOVER_ZONE_PX:16,
+  HOLD_START_MS:400, HOLD_SPEEDS:[120,80,40],
+  MIN_SEG_FLOOR:300,
+  CANVAS_H:320,           // ES: alto del canvas (4 bandas + waveform + beats + regla)
+  /* ES: Bandas verticales. Los clips MANUALES viven en su propia franja (mclip)
+        para no superponerse con los clips automáticos.
+     EN: Vertical bands. MANUAL clips live in their own stripe (mclip) so they
+        never overlap auto-generated clips. */
+  BANDS:{sec:[0,24],scn:[26,46],clip:[48,66],mclip:[68,86],wave:[90,244],beat:[246,266],rule:[266,320]},
+  COLORS:{sections:['#00e5ff','#ff2e88','#39ff8e','#ffb454','#a78bfa','#f97316','#22d3ee','#ec4899'],
+          scenes:['#66f2ff','#ff7eb3','#7dffb8','#ffc97d','#c4a7ff','#ffb066','#66d9f2','#f27eb3'],
+          manual:'#ffb454'},
+  OVER_COLOR:'#ff4d5e'
+};
+
+/* ################################################################################
+   #  01 · ESTADO GLOBAL / GLOBAL STATE                                           #
+   ################################################################################ */
+let LANG=localStorage.getItem('bca_lang')||'es';
+let state={projectName:'Proyecto sin título',bpm:null,events:[],sections:[],scenes:[],assignments:[],clips:[],
+clipDescriptions:{},clipAesthetics:{},notepad:'',universalPrompt:'',universalPromptTitle:'',aesthetics:[],
+techConfig:{res:'1920x1080',fps:24,cfgScale:6,steps:25,includeCfg:false,includeSteps:false,customW:1920,customH:1080},
+globalConfig:{targetDuration:10,overlapSec:0,snapToBeat:false,snapThreshold:500,firstLastFrame:false,minClipDur:3,minClipOn:false},
+totalDurationMs:null,audioFileName:''};
+let audioCtx=null,audioBuffer=null,sourceNode=null,aS={playing:false,offsetMs:0,perfStart:0,raf:null};
+let zoom=1,scrollMs=0,markState={sec:'idle',scn:'idle',clip:'idle'},markStart={sec:0,scn:0,clip:0};
+let lastSecEndMs=0,editAes=-1,editScn=-1,editSec=-1,expandScn=-1,scnId=1,pendingMark=null;
+let snapE=false,snapB=false,lockD=false;
+let drag={active:false,type:null,idx:-1,edge:null,startX:0,startY:0,dragTime:null,moved:false,oS:0,oE:0};
+let undoStack=[],redoStack=[],notifLog=[],railOpen={},hoverA=null,aesTarget=null;
+let tpTarget=null,tpV={min:0,sec:0,ms:0};
+
+/* ################################################################################
+   #  02 · I18N                                                                   #
+   ################################################################################ */
+const I18N={es:{
+'tab.config':'⚙️ Configuración','tab.timeline':'🎵 Línea de Tiempo','tab.sections':'📑 Secciones','tab.scenes':'🎬 Escenas','tab.clipdesc':'📝 Descripción de Clips','tab.creative':'🎨 Creativo','tab.beats':'📊 Análisis de Beats','tab.export':'📤 Exportar',
+'btn.update':'🔄 Actualizar','btn.new':'＋ Nueva','btn.saveJson':'💾 Guardar JSON','btn.loadJson':'📂 Cargar JSON',
+'cfg.audioCsv':'🎵 Audio & CSV','cfg.loadAudio':'🎧 Cargar audio','cfg.importCsv':'🥁 Importar CSV','cfg.bpm':'BPM','cfg.duration':'Duración total',
+'cfg.techTitle':'🖥️ Configuración técnica','cfg.resolution':'Resolución','cfg.customRes':'Personalizada','cfg.fps':'FPS',
+'cfg.clipTitle':'✂️ Configuración por defecto de clips','cfg.blockA':'BLOQUE A · DURACIÓN','cfg.blockB':'BLOQUE B · RITMO Y MÍNIMOS','cfg.blockC':'BLOQUE C · CONTINUIDAD',
+'cfg.targetDur':'Duración objetivo (s)','cfg.overlap':'Solapamiento (s)','cfg.snapBeat':'Ajustar al beat','cfg.snapThresh':'Umbral (ms)','cfg.minClipEn':'Duración mínima','cfg.minClip':'Mínimo (s)','cfg.flf':'First-Last-Frame',
+'tl.title':'🎵 Línea de Tiempo','tl.markSec':'📑 Sección (M)','tl.markScn':'🎬 Escena (S)','tl.markClip':'🎞 Clip (C)','tl.snapEdges':'🧲 Bordes','tl.snapBeats':'🥁 Beats','tl.lockD':'🔒 Límite D','tl.rail':'🎛️ Rail de navegación','tl.expandAll':'▸▸ Expandir','tl.collapseAll':'◂◂ Colapsar',
+'sec.addTitle':'📑 Añadir sección','sec.name':'Nombre','sec.desc':'Descripción','sec.mode':'Modo','sec.time':'Tiempo','sec.beats':'Beats','sec.from':'Desde','sec.to':'Hasta','sec.fromBeat':'Desde #','sec.toBeat':'Hasta #','sec.add':'＋ Añadir','sec.listTitle':'📋 Secciones','sec.genClips':'🎬 Generar clips','sec.scenes':'escenas','sec.clips':'clips','sec.enterHint':'💡 Enter guarda el formulario.',
+'scn.libTitle':'🎬 Biblioteca de Escenas','scn.create':'＋ Crear escena','scn.name':'Nombre','scn.aesthetic':'Estética','scn.desc':'Dirección visual','scn.targetDur':'Duración clip','scn.inherit':'Heredar','scn.custom':'Custom','scn.overlap':'Solapamiento','scn.save':'Guardar','scn.cancel':'Cancelar','scn.crossFLF':'Continuidad entre apariciones','scn.assignTitle':'📎 Asignación a Secciones','scn.selectSection':'Sección','scn.selectScene':'Escena','scn.from':'Desde','scn.to':'Hasta','scn.assign':'＋ Asignar','scn.more':'ver más','scn.less':'ver menos','scn.uses':'usos',
+'beats.title':'📊 Análisis de Beats','beats.time':'Tiempo','beats.interval':'Intervalo','beats.export':'⬇ Exportar CSV',
+'cd.title':'📝 Descripción de Clips',
+'cr.upTitle':'🎬 Prompt Universal','cr.upName':'Título','cr.export':'⬇ Exportar','cr.import':'📥 Importar','cr.notes':'📝 Bloc de notas','cr.aiContext':'🤖 Contexto para IA','cr.aesthetics':'🎨 Estéticas visuales','cr.create':'＋ Crear','cr.name':'Nombre','cr.content':'Contenido','cr.save':'Guardar','cr.cancel':'Cancelar',
+'ex.project':'Nombre del proyecto','ex.report':'📄 Informe (.txt)','ex.reportDesc':'Contexto + guiones + parámetros.','ex.json':'🧾 Proyecto (.json)','ex.jsonDesc':'Todo el proyecto.','ex.markers':'🎞️ Marcadores','ex.manual':'📖 Manual','ex.manualDesc':'Referencia absoluta.','ex.download':'⬇','ex.copy':'📋','ex.import':'📥','ex.downloadManual':'⬇ Manual',
+'tp.title':'⏱️ Tiempo','tp.min':'Min','tp.sec':'Seg','tp.ms':'Milis','tp.accept':'✓','tp.cancel':'✕',
+'mk.titleSec':'📑 Nueva sección','mk.titleScn':'🎬 Nueva escena','mk.titleClip':'🎞 Nuevo clip manual','mk.name':'Nombre','mk.desc':'Descripción','mk.aes':'Estética (aplica a esta barra)','mk.enter':'Enter guarda · Esc cancela',
+'notif.title':'🔔 Notificaciones','notif.clear':'Limpiar',
+'st.audio':'Audio','st.bpm':'BPM','st.cover':'Cobertura','st.warn':'avisos',
+'dash.sections':'Secciones','dash.scenes':'Escenas','dash.clips':'Clips','dash.frames':'Frames','dash.cover':'Cobertura','dash.script':'con guion','dash.aes':'con estética','dash.pending':'pendientes','dash.assign':'asignaciones','dash.reuse':'reutilizaciones',
+'rail.noScene':'sin escena','rail.manual':'Clips manuales',
+'tip.csv':'CSV de Sonic Visualiser.\nFormato: tiempo,numero\n\n1. File / Open... (Ctrl+O)\n2. Transform / Analysis by Category / Time / Tempo / Bar and Beat Tracker: Bars... (Ctrl+T)\n3. File / Export Annotation Layer... (Ctrl+Y)',
+'tip.bpm':'BPM de la canción.\nUsado para cálculos de ritmo.',
+'tip.duration':'Auto del audio.\nClic para definir manual.',
+'tip.cfg':'Fidelidad al prompt.\nDesmarca si tu IA no lo usa.',
+'tip.steps':'Pasos de inferencia.\nDesmarca si tu IA no lo usa.',
+'tip.clipDefaults':'Defaults heredables por escena y clip.',
+'tip.targetDur':'Techo absoluto por clip.\nNunca se excede.',
+'tip.overlap':'Margen de transición en segundos.\nSe resta del objetivo.\n0 = apagado.',
+'tip.snapBeat':'Imanta el fin del clip al beat anterior.\nSolo acorta, nunca alarga.',
+'tip.snapThresh':'Distancia máxima para imantar.',
+'tip.minClip':'Piso deseado por clip.\nBlando: el techo gana si chocan.',
+'tip.flf':'Último frame = primer frame del siguiente.\nDentro de la misma aparición.',
+'tip.crossFLF':'Encadena FLF entre apariciones de la misma escena\n(aunque crucen secciones).',
+'tip.sceneLib':'Unidades visuales reutilizables.',
+'tip.assign':'Apariciones de escenas en secciones.',
+'tip.tl':'Bandas: Secciones / Escenas / Clips auto / Clips manuales.\nM=sección, S=escena, C=clip manual.\nAl crear se piden nombre, descripción y estética.\nDoble clic en barra = configurar.\n🧲 bordes · 🥁 beats · 🔒 límite D.\nEnter guarda formularios.',
+'tip.rail':'▶ reproducir · ⚙ configurar · 🎨 estética.\nClips auto agrupados por escena; manuales aparte.',
+'toast.audio':'🎧 Audio cargado','toast.csv':'✅ beats','toast.sec':'✅ Sección','toast.scn':'✅ Escena','toast.asn':'✅ Asignación','toast.clips':'🎬 clips','toast.copy':'📋 Copiado','toast.jsonS':'💾 JSON','toast.jsonL':'📂 Proyecto','toast.undo':'↩️ Deshecho','toast.redo':'↪️ Rehecho','toast.report':'⬇ Informe','toast.mark':'⬇ Marcadores','toast.guide':'⬇ Manual','toast.upE':'⬇ Prompt Universal','toast.upI':'Prompt Universal','toast.aesE':'Estética exportada','toast.aesI':'Estética importada','toast.audioR':'⚠ Este proyecto usaba el audio','toast.loadM':'Cárgalo manualmente.','toast.noSec':'⚠ Define secciones primero','toast.noName':'⚠ Ponle nombre','toast.endStart':'⚠ Fin después del inicio','toast.lang':'Idioma: Español','toast.ai':'🤖 Contexto IA insertado','toast.cross':'🎬 Escena cruza sección: 2 asignaciones','toast.minW':'⚠ Mínimo incompatible con techo: gana el techo','toast.csvE':'⬇ CSV exportado','toast.snapE':'🧲','toast.snapB':'🥁','toast.lock':'🔒','toast.noSectionForScene':'⚠ Escena sin sección contenedora',
+'warn.noCsv':'⚠ Sin CSV: funciones de beats desactivadas.','warn.noAudio':'⚠ Sin audio.','warn.noBpm':'⚠ BPM no definido.','warn.long':'⚠ Clips >20s: riesgo.','warn.over':'⚠ Clips exceden duración objetivo.',
+},en:{
+'tab.config':'⚙️ Settings','tab.timeline':'🎵 Timeline','tab.sections':'📑 Sections','tab.scenes':'🎬 Scenes','tab.clipdesc':'📝 Clip Descriptions','tab.creative':'🎨 Creative','tab.beats':'📊 Beat Analysis','tab.export':'📤 Export',
+'btn.update':'🔄 Update','btn.new':'＋ New','btn.saveJson':'💾 Save JSON','btn.loadJson':'📂 Load JSON',
+'cfg.audioCsv':'🎵 Audio & CSV','cfg.loadAudio':'🎧 Load audio','cfg.importCsv':'🥁 Import CSV','cfg.bpm':'BPM','cfg.duration':'Total duration',
+'cfg.techTitle':'🖥️ Technical settings','cfg.resolution':'Resolution','cfg.customRes':'Custom','cfg.fps':'FPS',
+'cfg.clipTitle':'✂️ Default clip settings','cfg.blockA':'BLOCK A · DURATION','cfg.blockB':'BLOCK B · RHYTHM & MINIMUMS','cfg.blockC':'BLOCK C · CONTINUITY',
+'cfg.targetDur':'Target duration (s)','cfg.overlap':'Overlap (s)','cfg.snapBeat':'Snap to beat','cfg.snapThresh':'Threshold (ms)','cfg.minClipEn':'Min duration','cfg.minClip':'Min (s)','cfg.flf':'First-Last-Frame',
+'tl.title':'🎵 Timeline','tl.markSec':'📑 Section (M)','tl.markScn':'🎬 Scene (S)','tl.markClip':'🎞 Clip (C)','tl.snapEdges':'🧲 Edges','tl.snapBeats':'🥁 Beats','tl.lockD':'🔒 Limit D','tl.rail':'🎛️ Navigation rail','tl.expandAll':'▸▸ Expand','tl.collapseAll':'◂◂ Collapse',
+'sec.addTitle':'📑 Add section','sec.name':'Name','sec.desc':'Description','sec.mode':'Mode','sec.time':'Time','sec.beats':'Beats','sec.from':'From','sec.to':'To','sec.fromBeat':'From #','sec.toBeat':'To #','sec.add':'＋ Add','sec.listTitle':'📋 Sections','sec.genClips':'🎬 Generate clips','sec.scenes':'scenes','sec.clips':'clips','sec.enterHint':'💡 Enter saves the form.',
+'scn.libTitle':'🎬 Scene Library','scn.create':'＋ Create scene','scn.name':'Name','scn.aesthetic':'Aesthetic','scn.desc':'Visual direction','scn.targetDur':'Clip duration','scn.inherit':'Inherit','scn.custom':'Custom','scn.overlap':'Overlap','scn.save':'Save','scn.cancel':'Cancel','scn.crossFLF':'Cross-appearance continuity','scn.assignTitle':'📎 Assignment to Sections','scn.selectSection':'Section','scn.selectScene':'Scene','scn.from':'From','scn.to':'To','scn.assign':'＋ Assign','scn.more':'see more','scn.less':'see less','scn.uses':'uses',
+'beats.title':'📊 Beat Analysis','beats.time':'Time','beats.interval':'Interval','beats.export':'⬇ Export CSV',
+'cd.title':'📝 Clip Descriptions',
+'cr.upTitle':'🎬 Universal Prompt','cr.upName':'Title','cr.export':'⬇ Export','cr.import':'📥 Import','cr.notes':'📝 Notepad','cr.aiContext':'🤖 AI Context','cr.aesthetics':'🎨 Visual aesthetics','cr.create':'＋ Create','cr.name':'Name','cr.content':'Content','cr.save':'Save','cr.cancel':'Cancel',
+'ex.project':'Project name','ex.report':'📄 Report (.txt)','ex.reportDesc':'Context + scripts + params.','ex.json':'🧾 Project (.json)','ex.jsonDesc':'Entire project.','ex.markers':'🎞️ Markers','ex.manual':'📖 Manual','ex.manualDesc':'Absolute reference.','ex.download':'⬇','ex.copy':'📋','ex.import':'📥','ex.downloadManual':'⬇ Manual',
+'tp.title':'⏱️ Time','tp.min':'Min','tp.sec':'Sec','tp.ms':'Millis','tp.accept':'✓','tp.cancel':'✕',
+'mk.titleSec':'📑 New section','mk.titleScn':'🎬 New scene','mk.titleClip':'🎞 New manual clip','mk.name':'Name','mk.desc':'Description','mk.aes':'Aesthetic (applies to this bar)','mk.enter':'Enter saves · Esc cancels',
+'notif.title':'🔔 Notifications','notif.clear':'Clear',
+'st.audio':'Audio','st.bpm':'BPM','st.cover':'Coverage','st.warn':'warnings',
+'dash.sections':'Sections','dash.scenes':'Scenes','dash.clips':'Clips','dash.frames':'Frames','dash.cover':'Coverage','dash.script':'with script','dash.aes':'with aesthetic','dash.pending':'pending','dash.assign':'assignments','dash.reuse':'reuses',
+'rail.noScene':'no scene','rail.manual':'Manual clips',
+'tip.csv':'CSV from Sonic Visualiser.\nFormat: time,number\n\n1. File / Open... (Ctrl+O)\n2. Transform / Analysis by Category / Time / Tempo / Bar and Beat Tracker: Bars... (Ctrl+T)\n3. File / Export Annotation Layer... (Ctrl+Y)',
+'tip.bpm':'Song BPM.\nUsed for rhythm math.',
+'tip.duration':'Auto from audio.\nClick to set manually.',
+'tip.cfg':'Prompt fidelity.\nUncheck if your AI ignores it.',
+'tip.steps':'Inference steps.\nUncheck if your AI ignores it.',
+'tip.clipDefaults':'Defaults inherited by scenes and clips.',
+'tip.targetDur':'Hard ceiling per clip.\nNever exceeded.',
+'tip.overlap':'Transition margin in seconds.\nSubtracted from target.\n0 = off.',
+'tip.snapBeat':'Magnets clip end to previous beat.\nOnly shortens, never extends.',
+'tip.snapThresh':'Max distance to magnet.',
+'tip.minClip':'Desired floor per clip.\nSoft: ceiling wins on conflict.',
+'tip.flf':'Last frame = next first frame.\nWithin same appearance.',
+'tip.crossFLF':'Chains FLF across appearances of same scene\n(even across sections).',
+'tip.sceneLib':'Reusable visual units.',
+'tip.assign':'Scene appearances in sections.',
+'tip.tl':'Bands: Sections / Scenes / Auto clips / Manual clips.\nM=section, S=scene, C=manual clip.\nCreating asks name, description and aesthetic.\nDouble-click bar = configure.\n🧲 edges · 🥁 beats · 🔒 limit D.\nEnter saves forms.',
+'tip.rail':'▶ play · ⚙ configure · 🎨 aesthetic.\nAuto clips grouped by scene; manual apart.',
+'toast.audio':'🎧 Audio loaded','toast.csv':'✅ beats','toast.sec':'✅ Section','toast.scn':'✅ Scene','toast.asn':'✅ Assignment','toast.clips':'🎬 clips','toast.copy':'📋 Copied','toast.jsonS':'💾 JSON','toast.jsonL':'📂 Project','toast.undo':'↩️ Undone','toast.redo':'↪️ Redone','toast.report':'⬇ Report','toast.mark':'⬇ Markers','toast.guide':'⬇ Manual','toast.upE':'⬇ Universal Prompt','toast.upI':'Universal Prompt','toast.aesE':'Aesthetic exported','toast.aesI':'Aesthetic imported','toast.audioR':'⚠ This project used audio','toast.loadM':'Load it manually.','toast.noSec':'⚠ Define sections first','toast.noName':'⚠ Enter a name','toast.endStart':'⚠ End after start','toast.lang':'Language: English','toast.ai':'🤖 AI Context inserted','toast.cross':'🎬 Scene crosses section: 2 assignments','toast.minW':'⚠ Min incompatible with ceiling: ceiling wins','toast.csvE':'⬇ CSV exported','toast.snapE':'🧲','toast.snapB':'🥁','toast.lock':'🔒','toast.noSectionForScene':'⚠ Scene without containing section',
+'warn.noCsv':'⚠ No CSV: beat features disabled.','warn.noAudio':'⚠ No audio.','warn.noBpm':'⚠ BPM not set.','warn.long':'⚠ Clips >20s: risk.','warn.over':'⚠ Clips exceed target duration.',
+}};
+const t=k=>(I18N[LANG]&&I18N[LANG][k])||I18N.es[k]||k;
+const L=(es,en)=>LANG==='es'?es:en;
+function setLang(l){LANG=l;localStorage.setItem('bca_lang',l);applyLang();}
+function toggleLang(){setLang(LANG==='es'?'en':'es');toast(t('toast.lang'));}
+function applyLang(){$('btnLang').textContent=LANG==='es'?'🌐 EN':'🌐 ES';
+document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n);});
+buildTabs();renderAll();}
+
+/* ################################################################################
+   #  03 · UTILIDADES / UTILITIES                                                 #
+   ################################################################################ */
+const $=id=>document.getElementById(id);
+const msToTime=ms=>{if(ms==null||isNaN(ms))return'00:00:000';ms=Math.max(0,Math.round(ms));
+return String(Math.floor(ms/60000)).padStart(2,'0')+':'+String(Math.floor(ms%60000/1000)).padStart(2,'0')+':'+String(Math.floor(ms%1000)).padStart(3,'0');};
+function timeToMs(s){if(!s)return 0;s=String(s).trim().replace(/,/g,'.');
+if(s.includes(':')){const p=s.split(':');if(p.length===3)return(+p[0]||0)*60000+(+p[1]||0)*1000+(+p[2]||0);
+if(p.length===2)return(+p[0]||0)*60000+(+p[1]||0)*1000;}
+const v=parseFloat(s);return isNaN(v)?0:Math.round(v*1000);}
+const fmtDur=ms=>ms==null?'—':(ms/1000).toFixed(2)+'s';
+const sn=s=>(s||'proyecto').replace(/[^\w\- ]/g,'').replace(/\s+/g,'_');
+function dl(fn,ct){const b=new Blob([ct],{type:'text/plain;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn;a.click();URL.revokeObjectURL(a.href);}
+function cp(x){navigator.clipboard.writeText(x).then(()=>toast(t('toast.copy'))).catch(()=>{const ta=document.createElement('textarea');ta.value=x;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();toast(t('toast.copy'));});}
+const tg=id=>{const el=$(id);el.checked=!el.checked;syncTcards();readCfg();};
+const ck=id=>tg(id);
+function syncTcards(){[['tcSnap','gSnap'],['tcMin','gMinOn'],['tcFLF','gFLF']].forEach(p=>{const c=$(p[1]);if(c)$(p[0]).classList.toggle('on',c.checked);});}
+
+/* ################################################################################
+   #  04 · NOTIFICACIONES / NOTIFICATIONS                                         #
+   ################################################################################ */
+function toast(msg,type){const el=$('toast');el.textContent=msg;
+el.style.borderColor=type==='err'?'var(--danger)':type==='warn'?'var(--amber)':'var(--green)';
+el.style.color=el.style.borderColor;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),CONFIG.TOAST_MS);
+notifLog.unshift({text:msg,time:new Date().toLocaleTimeString()});if(notifLog.length>CONFIG.NOTIF_LIMIT)notifLog.pop();renderNotifs();}
+function renderNotifs(){$('notifList').innerHTML=notifLog.map(n=>'<div class="notif-item"><span class="time">['+n.time+']</span> '+n.text+'</div>').join('')||'—';}
+const toggleNotifPanel=()=>$('notifPanel').classList.toggle('show');
+const clearNotifs=()=>{notifLog=[];renderNotifs();};
+
+/* ################################################################################
+   #  05 · UNDO / REDO                                                            #
+   ################################################################################ */
+const snap=()=>JSON.parse(JSON.stringify({s:state.sections,sc:state.scenes,a:state.assignments,c:state.clips}));
+function pushUndo(l){undoStack.push({d:snap(),l});if(undoStack.length>CONFIG.UNDO_LIMIT)undoStack.shift();redoStack=[];}
+function restore(d){state.sections=d.s;state.scenes=d.sc;state.assignments=d.a;state.clips=d.c;renderAll();}
+function undoAction(){if(!undoStack.length)return;redoStack.push({d:snap(),l:''});restore(undoStack.pop().d);toast(t('toast.undo'));}
+function redoAction(){if(!redoStack.length)return;undoStack.push({d:snap(),l:''});restore(redoStack.pop().d);toast(t('toast.redo'));}
+
+/* ################################################################################
+   #  06 · TOOLTIPS                                                               #
+   ################################################################################ */
+function initTooltips(){const tip=$('jsTooltip');
+document.addEventListener('mouseover',e=>{const el=e.target.closest('.tip');if(!el)return;
+const txt=el.dataset.tipKey?t(el.dataset.tipKey):(el.dataset.tip||'');if(!txt)return;
+tip.textContent=txt;tip.style.display='block';const r=el.getBoundingClientRect();
+let top=r.top-tip.offsetHeight-8;if(top<4)top=r.bottom+8;
+tip.style.top=top+'px';tip.style.left=Math.min(r.left+8,innerWidth-300)+'px';});
+document.addEventListener('mouseout',e=>{if(e.target.closest('.tip'))tip.style.display='none';});}
+
+/* ################################################################################
+   #  07 · MOTOR DE AUDIO / AUDIO ENGINE                                          #
+   ################################################################################ */
+function initAC(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();}
+function loadAudio(f){initAC();state.audioFileName=f.name;const r=new FileReader();
+r.onload=async e=>{try{audioBuffer=await audioCtx.decodeAudioData(e.target.result);
+state.totalDurationMs=Math.round(audioBuffer.duration*1000);
+$('totalDuration').value=msToTime(state.totalDurationMs);$('tlTotalTime').textContent=msToTime(state.totalDurationMs);
+renderAll();toast(t('toast.audio')+': '+f.name);}catch(err){toast('⚠','err');}};r.readAsArrayBuffer(f);}
+const curMs=()=>aS.playing?Math.min(aS.offsetMs+(performance.now()-aS.perfStart),state.totalDurationMs||0):aS.offsetMs;
+function togglePlay(){if(!audioBuffer){toast('⚠','warn');return;}initAC();if(audioCtx.state==='suspended')audioCtx.resume();
+aS.playing?pausePB():startPB();}
+function killNode(){if(sourceNode){sourceNode.onended=null;try{sourceNode.stop();}catch(e){}}sourceNode=null;}
+function startPB(){if(!audioBuffer)return;if(aS.raf)cancelAnimationFrame(aS.raf);killNode();
+sourceNode=audioCtx.createBufferSource();sourceNode.buffer=audioBuffer;sourceNode.connect(audioCtx.destination);
+sourceNode.start(0,Math.min(aS.offsetMs/1000,audioBuffer.duration));
+aS.perfStart=performance.now();aS.playing=true;$('btnPlay').textContent='⏸';
+sourceNode.onended=()=>{if(aS.playing){aS.playing=false;aS.offsetMs=0;$('btnPlay').textContent='▶';
+if(aS.raf)cancelAnimationFrame(aS.raf);drawPH(0);$('tlCurrentTime').textContent=msToTime(0);}};animPH();}
+function pausePB(){if(!aS.playing)return;aS.offsetMs=curMs();killNode();aS.playing=false;
+if(aS.raf)cancelAnimationFrame(aS.raf);$('btnPlay').textContent='▶';}
+function stopPB(){killNode();aS.playing=false;aS.offsetMs=0;if(aS.raf)cancelAnimationFrame(aS.raf);
+$('btnPlay').textContent='▶';drawPH(0);$('tlCurrentTime').textContent=msToTime(0);}
+function seekTo(ms){const max=state.totalDurationMs||0;ms=Math.max(0,Math.min(ms,max));
+const w=aS.playing;if(w){killNode();aS.playing=false;if(aS.raf)cancelAnimationFrame(aS.raf);}
+aS.offsetMs=ms;if(w)startPB();else{drawPH(ms);$('tlCurrentTime').textContent=msToTime(ms);}}
+function animPH(){if(!aS.playing)return;const c=curMs();if(c>=(state.totalDurationMs||Infinity)){stopPB();return;}
+$('tlCurrentTime').textContent=msToTime(c);drawPH(c);aS.raf=requestAnimationFrame(animPH);}
+
+/* ################################################################################
+   #  08 · SNAPS                                                                  #
+   ################################################################################ */
+function tgSnap(w){if(w==='edges'){snapE=!snapE;$('btnSnapE').classList.toggle('active-toggle',snapE);}
+else{snapB=!snapB;$('btnSnapB').classList.toggle('active-toggle',snapB);}
+toast(t(w==='edges'?'toast.snapE':'toast.snapB')+(w==='edges'?(snapE?' ON':' OFF'):(snapB?' ON':' OFF')));}
+function tgLock(){lockD=!lockD;$('btnLock').classList.toggle('active-toggle',lockD);toast(t('toast.lock')+(lockD?' ON':' OFF'));}
+function snapMs(ms,ex){ex=ex||{};let best=ms,bd=Infinity;
+if(snapE){const T=[0,state.totalDurationMs||0];
+state.sections.forEach((s,i)=>{if(i!==ex.sec){T.push(s.startMs,s.endMs);}});
+state.assignments.forEach((a,i)=>{if(i!==ex.asn){T.push(a.startMs,a.endMs);}});
+state.clips.forEach((c,i)=>{if(i!==ex.clip){T.push(c.startMs,c.endMs);}});
+for(const g of T){const d=Math.abs(ms-g);if(d<CONFIG.SNAP_EDGE_MS&&d<bd){bd=d;best=g;}}}
+if(snapB&&state.events.length){const th=state.globalConfig.snapThreshold||500;
+for(const b of state.events){const d=Math.abs(ms-b.timeMs);if(d<th&&d<bd){bd=d;best=b.timeMs;}}}
+return best;}
+
+/* ################################################################################
+   #  09 · DIBUJO DEL TIMELINE / TIMELINE RENDERING                               #
+   ################################################################################ */
+const cW=()=>$('tlCanvasWrap').clientWidth||1200;
+const t2x=ms=>((ms-scrollMs)/((state.totalDurationMs||1)/zoom))*cW();
+const x2t=x=>scrollMs+(x/cW())*((state.totalDurationMs||1)/zoom);
+function clampScroll(){const td=state.totalDurationMs||1,v=td/zoom;scrollMs=Math.max(0,Math.min(scrollMs,td-v));}
+const Dms=()=>Math.max(500,(state.globalConfig.targetDuration||10)*1000);
+const sceneById=id=>state.scenes.find(s=>s.id===id);
+function aesColor(i){const n=state.aesthetics[i]?state.aesthetics[i].name:'x';let h=0;
+for(const ch of n)h=(h*31+ch.charCodeAt(0))%360;return 'hsl('+h+',70%,55%)';}
+function drawTL(){const bg=$('tlBg'),ov=$('tlOverlay'),W=cW(),H=CONFIG.CANVAS_H;bg.width=W;bg.height=H;ov.width=W;ov.height=H;
+const c=bg.getContext('2d');c.clearRect(0,0,W,H);c.fillStyle='#0d0d18';c.fillRect(0,0,W,H);
+const td=state.totalDurationMs||0;if(td<=0)return;const D=Dms();const B=CONFIG.BANDS;
+state.sections.forEach((s,i)=>{const x1=t2x(s.startMs),x2=t2x(s.endMs);if(x2<0||x1>W)return;
+const col=CONFIG.COLORS.sections[i%CONFIG.COLORS.sections.length];
+c.fillStyle=col;c.globalAlpha=.25;c.fillRect(x1,B.sec[0],Math.max(1,x2-x1),B.sec[1]-B.sec[0]);c.globalAlpha=1;
+c.strokeStyle=col;c.strokeRect(x1,B.sec[0],Math.max(1,x2-x1),B.sec[1]-B.sec[0]);
+c.fillStyle=col;c.fillRect(x1-2,B.sec[0],4,B.sec[1]-B.sec[0]);c.fillRect(x2-2,B.sec[0],4,B.sec[1]-B.sec[0]);
+if(s.aestheticIdx!=null&&s.aestheticIdx>=0){c.fillStyle=aesColor(s.aestheticIdx);c.fillRect(x1,B.sec[1]-3,Math.max(1,x2-x1),3);}
+c.font='bold 9px sans-serif';c.textBaseline='middle';
+if(x2-x1>25)c.fillText(s.name.slice(0,16),x1+6,(B.sec[0]+B.sec[1])/2);});
+state.assignments.forEach((a,ai)=>{const x1=t2x(a.startMs),x2=t2x(a.endMs);if(x2<0||x1>W)return;
+const sc=sceneById(a.sceneId);const si=state.scenes.indexOf(sc);const col=CONFIG.COLORS.scenes[(si<0?0:si)%CONFIG.COLORS.scenes.length];
+c.fillStyle=col;c.globalAlpha=.18;c.fillRect(x1,B.scn[0],Math.max(1,x2-x1),B.scn[1]-B.scn[0]);c.globalAlpha=1;
+c.strokeStyle=col;c.strokeRect(x1,B.scn[0],Math.max(1,x2-x1),B.scn[1]-B.scn[0]);
+c.fillStyle=col;c.fillRect(x1-2,B.scn[0],4,B.scn[1]-B.scn[0]);c.fillRect(x2-2,B.scn[0],4,B.scn[1]-B.scn[0]);
+if(sc&&sc.aestheticIdx!=null&&sc.aestheticIdx>=0){c.fillStyle=aesColor(sc.aestheticIdx);c.fillRect(x1,B.scn[1]-3,Math.max(1,x2-x1),3);}
+const rng=a.endMs-a.startMs;
+if(sc&&x2-x1>25){c.font='8px sans-serif';c.textBaseline='middle';c.fillStyle=col;
+let lbl=sc.name.slice(0,14);if(rng>D)lbl+=' →'+Math.ceil(rng/D);
+c.fillText(lbl,x1+5,(B.scn[0]+B.scn[1])/2);}});
+/* -- Clips AUTOMÁTICOS (banda clip) / AUTO clips (clip band) -- */
+state.clips.forEach(cl=>{if(cl.manual)return;const[y0,y1]=B.clip;
+const x1=t2x(cl.startMs),x2=t2x(cl.endMs);if(x2<0||x1>W)return;
+const over=cl.genDurMs>(cl.D||D)+1;
+c.fillStyle=over?'rgba(255,77,94,.35)':'rgba(216,216,232,.22)';c.fillRect(x1,y0,Math.max(1,x2-x1),y1-y0);
+c.strokeStyle=over?CONFIG.OVER_COLOR:'rgba(216,216,232,.5)';c.strokeRect(x1,y0,Math.max(1,x2-x1),y1-y0);
+if(over){c.save();c.beginPath();c.rect(x1,y0,Math.max(1,x2-x1),y1-y0);c.clip();
+c.strokeStyle='rgba(255,77,94,.6)';for(let x=x1-18;x<x2;x+=6){c.beginPath();c.moveTo(x,y1);c.lineTo(x+18,y0);c.stroke();}c.restore();
+c.fillStyle=CONFIG.OVER_COLOR;c.font='9px sans-serif';c.fillText('⚠',x1+2,(y0+y1)/2);}
+const av=aestOfClip(cl);if(av>=0){c.fillStyle=aesColor(av);c.fillRect(x1,y1-3,Math.max(1,x2-x1),3);}
+if(hoverA&&hoverA.type==='clip'&&hoverA.ref===cl.id){c.font='11px sans-serif';c.fillText('🎨',t2x(hoverA.barE)-14,(y0+y1)/2+4);}});
+/* -- Clips MANUALES (banda propia, estilo ámbar punteado) / MANUAL clips (own band) -- */
+state.clips.forEach(cl=>{if(!cl.manual)return;const[y0,y1]=B.mclip;
+const x1=t2x(cl.startMs),x2=t2x(cl.endMs);if(x2<0||x1>W)return;
+const over=cl.genDurMs>(cl.D||D)+1;
+c.fillStyle=over?'rgba(255,77,94,.35)':'rgba(255,180,84,.22)';c.fillRect(x1,y0,Math.max(1,x2-x1),y1-y0);
+c.strokeStyle=over?CONFIG.OVER_COLOR:CONFIG.COLORS.manual;c.setLineDash([5,3]);
+c.strokeRect(x1,y0,Math.max(1,x2-x1),y1-y0);c.setLineDash([]);
+if(over){c.save();c.beginPath();c.rect(x1,y0,Math.max(1,x2-x1),y1-y0);c.clip();
+c.strokeStyle='rgba(255,77,94,.6)';for(let x=x1-18;x<x2;x+=6){c.beginPath();c.moveTo(x,y1);c.lineTo(x+18,y0);c.stroke();}c.restore();}
+const av=aestOfClip(cl);if(av>=0){c.fillStyle=aesColor(av);c.fillRect(x1,y1-3,Math.max(1,x2-x1),3);}
+c.font='8px sans-serif';c.textBaseline='middle';c.fillStyle=CONFIG.COLORS.manual;
+if(x2-x1>20)c.fillText('✍'+String(cl.id).padStart(2,'0'),x1+3,(y0+y1)/2);
+if(hoverA&&hoverA.type==='clip'&&hoverA.ref===cl.id){c.font='11px sans-serif';c.fillText('🎨',t2x(hoverA.barE)-14,(y0+y1)/2+4);}});
+if(hoverA&&(hoverA.type==='sec'||hoverA.type==='scn')){c.font='11px sans-serif';
+c.fillText('🎨',t2x(hoverA.barE)-14,(B[hoverA.type][0]+B[hoverA.type][1])/2+4);}
+if(audioBuffer)drawWF(c,W,B.wave[0],B.wave[1]-B.wave[0]);
+state.events.forEach(e=>{const x=t2x(e.timeMs);if(x<0||x>W)return;
+c.strokeStyle='rgba(255,46,136,.8)';c.lineWidth=1.5;c.beginPath();c.moveTo(x,B.beat[0]);c.lineTo(x,B.beat[1]);c.stroke();});
+drawRuler(c,W,H);}
+function drawRuler(c,W,H){const td=state.totalDurationMs||1,v=td/zoom;const[y0,y1]=CONFIG.BANDS.rule;c.textBaseline='top';
+const msStep=v<8000?100:v<20000?250:0;
+if(msStep){for(let tt=Math.floor(scrollMs/msStep)*msStep;tt<scrollMs+v;tt+=msStep){const x=t2x(tt);if(x<0||x>W)continue;
+c.strokeStyle='rgba(136,136,168,.4)';c.lineWidth=1;c.beginPath();c.moveTo(x,y1-7);c.lineTo(x,y1-2);c.stroke();}}
+for(let tt=Math.floor(scrollMs/1000)*1000;tt<scrollMs+v;tt+=1000){const x=t2x(tt);if(x<0||x>W)continue;
+c.strokeStyle='rgba(136,136,168,.65)';c.lineWidth=1.5;c.beginPath();c.moveTo(x,y1-12);c.lineTo(x,y1-2);c.stroke();}
+let maj=v>120000?10000:5000;
+for(let tt=Math.floor(scrollMs/maj)*maj;tt<scrollMs+v;tt+=maj){const x=t2x(tt);if(x<0||x>W)continue;
+c.strokeStyle='rgba(136,136,168,.95)';c.lineWidth=2;c.beginPath();c.moveTo(x,y1-17);c.lineTo(x,y1-2);c.stroke();
+c.fillStyle='#999';c.font='10px monospace';c.fillText(msToTime(tt).slice(0,5),x+3,y0+2);}}
+function drawWF(c,W,yS,h){const d=audioBuffer.getChannelData(0),td=state.totalDurationMs||1,v=td/zoom;
+const s0=Math.floor(scrollMs/td*d.length),s1=Math.min(d.length,Math.floor((scrollMs+v)/td*d.length));
+const spp=Math.max(1,Math.floor((s1-s0)/W));c.fillStyle='rgba(0,229,255,.3)';
+for(let x=0;x<W;x++){const st=s0+x*spp,en=Math.min(st+spp,s1);let mn=1,mx=-1;
+const step=Math.max(1,Math.floor(spp/50));for(let i=st;i<en;i+=step){if(d[i]<mn)mn=d[i];if(d[i]>mx)mx=d[i];}
+c.fillRect(x,yS+(1-mx)*h/2,1,Math.max(1,(1-mn)*h/2-(1-mx)*h/2));}}
+/* ES: (FIX visual) La etiqueta de arrastre/scrub ahora usa textBaseline 'top'
+       y un fondo oscuro: siempre legible, nunca recortada arriba.
+   EN: Drag/scrub label now uses textBaseline 'top' over a dark chip: always
+       readable, never clipped at the top. */
+function drawPH(ms){const ov=$('tlOverlay'),c=ov.getContext('2d'),W=cW(),H=CONFIG.CANVAS_H;c.clearRect(0,0,W,H);
+const x=t2x(ms);if(x>=0&&x<=W){c.strokeStyle='#ff2e88';c.lineWidth=2;c.beginPath();c.moveTo(x,0);c.lineTo(x,H);c.stroke();
+c.fillStyle='#ff2e88';c.beginPath();c.moveTo(x-5,0);c.lineTo(x+5,0);c.lineTo(x,8);c.fill();}
+['sec','scn','clip'].forEach(k=>{if(markState[k]==='start'){const mx=t2x(markStart[k]);
+if(mx>=0&&mx<=W){c.strokeStyle='#39ff8e';c.setLineDash([4,4]);c.beginPath();c.moveTo(mx,0);c.lineTo(mx,H);c.stroke();c.setLineDash([]);}}});
+if(drag.active&&drag.dragTime!=null){const dx=t2x(drag.dragTime);if(dx>=0&&dx<=W){
+c.strokeStyle='#ffb454';c.lineWidth=1;c.setLineDash([2,2]);c.beginPath();c.moveTo(dx,0);c.lineTo(dx,H);c.stroke();c.setLineDash([]);
+c.font='10px monospace';c.textBaseline='top';
+const lbl=msToTime(drag.dragTime);const wT=c.measureText(lbl).width;
+c.fillStyle='rgba(10,10,18,.85)';c.fillRect(dx+3,4,wT+6,14);
+c.fillStyle='#ffb454';c.fillText(lbl,dx+6,6);}}}
+function updSB(){const td=state.totalDurationMs||1,v=td/zoom,th=$('tlScrollThumb'),bar=$('tlScrollbar'),bw=bar.clientWidth||1;
+const tw=Math.max(22,v/td*bw);th.style.width=tw+'px';th.style.left=Math.min(scrollMs/td*bw,bw-tw)+'px';
+th.style.display=zoom<=1?'none':'block';}
+
+/* ################################################################################
+   #  10 · HIT-TEST POR BANDAS (incluye banda de clips manuales)                  #
+   ################################################################################ */
+function hitAt(x,y){const B=CONFIG.BANDS;
+if(y>=B.sec[0]&&y<=B.sec[1]){for(let i=0;i<state.sections.length;i++){const s=state.sections[i],x1=t2x(s.startMs),x2=t2x(s.endMs);
+if(Math.abs(x-x1)<6)return{t:'secR',i,e:'l'};if(Math.abs(x-x2)<6)return{t:'secR',i,e:'r'};
+if(x>x1+6&&x<x2-6)return{t:'secM',i};}return{t:'seek'};}
+if(y>=B.scn[0]&&y<=B.scn[1]){for(let i=0;i<state.assignments.length;i++){const a=state.assignments[i],x1=t2x(a.startMs),x2=t2x(a.endMs);
+if(Math.abs(x-x1)<6)return{t:'scnR',i,e:'l'};if(Math.abs(x-x2)<6)return{t:'scnR',i,e:'r'};
+if(x>x1+6&&x<x2-6)return{t:'scnM',i};}return{t:'seek'};}
+if(y>=B.clip[0]&&y<=B.clip[1]){for(let i=state.clips.length-1;i>=0;i--){const cl=state.clips[i];if(cl.manual)continue;
+const x1=t2x(cl.startMs),x2=t2x(cl.endMs);
+if(Math.abs(x-x1)<6)return{t:'clipR',i,e:'l'};if(Math.abs(x-x2)<6)return{t:'clipR',i,e:'r'};
+if(x>=x1&&x<=x2)return{t:'clipM',i};}return{t:'seek'};}
+if(y>=B.mclip[0]&&y<=B.mclip[1]){for(let i=state.clips.length-1;i>=0;i--){const cl=state.clips[i];if(!cl.manual)continue;
+const x1=t2x(cl.startMs),x2=t2x(cl.endMs);
+if(Math.abs(x-x1)<6)return{t:'clipR',i,e:'l'};if(Math.abs(x-x2)<6)return{t:'clipR',i,e:'r'};
+if(x>=x1&&x<=x2)return{t:'clipM',i};}return{t:'seek'};}
+return{t:'seek'};}
+function barEndOf(h){if(h.t==='secM')return state.sections[h.i].endMs;
+if(h.t==='scnM')return state.assignments[h.i].endMs;
+if(h.t==='clipM')return state.clips[h.i].endMs;return null;}
+function hoverRefOf(h){if(h.t==='secM')return{type:'sec',ref:h.i};
+if(h.t==='scnM')return{type:'scn',ref:state.assignments[h.i].sceneId};
+if(h.t==='clipM')return{type:'clip',ref:state.clips[h.i].id};return null;}
+
+/* ################################################################################
+   #  11 · INTERACCIÓN DEL TIMELINE                                               #
+   ################################################################################ */
+function initTL(){const wrap=$('tlCanvasWrap');
+wrap.addEventListener('mousedown',e=>{e.preventDefault();
+const r=wrap.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,ms=x2t(x);
+if(hoverA){e.stopPropagation();openAesMenu(hoverA.type,hoverA.ref,e.clientX,e.clientY);hoverA=null;drawPH(curMs());return;}
+const h=hitAt(x,y);
+if(h.t==='secR'){pushUndo('sec');drag={active:true,type:'secR',idx:h.i,edge:h.e,startX:e.clientX,startY:e.clientY,dragTime:null,moved:false};return;}
+if(h.t==='scnR'){pushUndo('scn');drag={active:true,type:'scnR',idx:h.i,edge:h.e,startX:e.clientX,startY:e.clientY,dragTime:null,moved:false,oS:state.assignments[h.i].startMs,oE:state.assignments[h.i].endMs};return;}
+if(h.t==='clipR'){pushUndo('clip');drag={active:true,type:'clipR',idx:h.i,edge:h.e,startX:e.clientX,startY:e.clientY,dragTime:null,moved:false,oS:state.clips[h.i].startMs,oE:state.clips[h.i].endMs};return;}
+if(h.t==='secM'){pushUndo('sec');drag={active:true,type:'secM',idx:h.i,startX:e.clientX,startY:e.clientY,dragTime:ms,moved:false,oS:state.sections[h.i].startMs,oE:state.sections[h.i].endMs};return;}
+if(h.t==='scnM'){pushUndo('scn');drag={active:true,type:'scnM',idx:h.i,startX:e.clientX,startY:e.clientY,dragTime:ms,moved:false,oS:state.assignments[h.i].startMs,oE:state.assignments[h.i].endMs};return;}
+if(h.t==='clipM'){pushUndo('clip');drag={active:true,type:'clipM',idx:h.i,startX:e.clientX,startY:e.clientY,dragTime:ms,moved:false,oS:state.clips[h.i].startMs,oE:state.clips[h.i].endMs};return;}
+drag={active:true,type:'scrub',startX:e.clientX,startY:e.clientY,dragTime:ms,moved:false};seekTo(ms);});
+wrap.addEventListener('mousemove',e=>{const r=wrap.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+if(!drag.active){const h=hitAt(x,y);hoverA=null;const be=barEndOf(h);
+if(be!=null&&x>t2x(be)-CONFIG.HOVER_ZONE_PX&&x<=t2x(be)+2){const hr=hoverRefOf(h);hoverA={type:hr.type,ref:hr.ref,barE:be};wrap.style.cursor='pointer';}
+else wrap.style.cursor='crosshair';
+drawPH(curMs());return;}
+const dx=e.clientX-drag.startX;if(Math.abs(dx)>3||Math.abs(e.clientY-drag.startY)>3)drag.moved=true;
+const ms=x2t(x);
+if(drag.type==='scrub'){drag.dragTime=ms;seekTo(ms);return;}
+const D=Dms();
+if(drag.type==='secR'){const sm=snapMs(ms,{sec:drag.idx});drag.dragTime=sm;const s=state.sections[drag.idx];
+if(drag.edge==='l')s.startMs=Math.min(sm,s.endMs-50);else s.endMs=Math.max(sm,s.startMs+50);}
+else if(drag.type==='scnR'){let sm=snapMs(ms,{asn:drag.idx});const a=state.assignments[drag.idx];
+if(lockD){if(drag.edge==='l')sm=Math.max(sm,a.endMs-D);else sm=Math.min(sm,a.startMs+D);}
+drag.dragTime=sm;if(drag.edge==='l')a.startMs=Math.min(sm,a.endMs-50);else a.endMs=Math.max(sm,a.startMs+50);
+clampAsnToSection(a);}
+else if(drag.type==='clipR'){let sm=snapMs(ms,{clip:drag.idx});const cl=state.clips[drag.idx];
+if(lockD){if(drag.edge==='l')sm=Math.max(sm,cl.endMs-D);else sm=Math.min(sm,cl.startMs+D);}
+drag.dragTime=sm;if(drag.edge==='l'){cl.startMs=sm;cl.genStartMs=sm;}else{cl.endMs=sm;cl.genEndMs=sm;}
+fixClipDur(cl);}
+else if(drag.type==='secM'){const at=x2t(drag.startX-r.left);let ns=Math.max(0,drag.oS+(ms-at));ns=snapMs(ns,{sec:drag.idx});
+const s=state.sections[drag.idx];const du=drag.oE-drag.oS;s.startMs=ns;s.endMs=ns+du;drag.dragTime=ms;}
+else if(drag.type==='scnM'){const at=x2t(drag.startX-r.left);let ns=Math.max(0,drag.oS+(ms-at));ns=snapMs(ms,{asn:drag.idx});
+const a=state.assignments[drag.idx];const du=drag.oE-drag.oS;const sec=state.sections[a.sectionIdx];
+if(sec){ns=Math.max(sec.startMs,Math.min(ns,sec.endMs-du));}
+a.startMs=ns;a.endMs=ns+du;drag.dragTime=ms;}
+else if(drag.type==='clipM'){const at=x2t(drag.startX-r.left);let ns=Math.max(0,drag.oS+(ms-at));ns=snapMs(ms,{clip:drag.idx});
+const cl=state.clips[drag.idx];const du=drag.oE-drag.oS;const rng=clipParentRange(cl);
+if(rng){ns=Math.max(rng[0],Math.min(ns,rng[1]-du));}
+cl.startMs=ns;cl.endMs=ns+du;cl.genStartMs=ns;cl.genEndMs=ns+du;fixClipDur(cl);drag.dragTime=ms;}
+drawTL();drawPH(curMs());});
+addEventListener('mouseup',()=>{if(!drag.active)return;
+if(drag.type!=='scrub'){relinkClips();renderAll();}
+drag={active:false,type:null,idx:-1,edge:null,startX:0,startY:0,dragTime:null,moved:false,oS:0,oE:0};drawTL();drawPH(curMs());});
+wrap.addEventListener('dblclick',e=>{const r=wrap.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+const h=hitAt(x,y);
+if(h.t==='secM'||h.t==='secR')goConfigure('sec',h.i);
+else if(h.t==='scnM'||h.t==='scnR')goConfigure('scn',state.assignments[h.i].sceneId);
+else if(h.t==='clipM'||h.t==='clipR')goConfigure('clip',state.clips[h.i].id);});
+wrap.addEventListener('wheel',e=>{e.preventDefault();const r=wrap.getBoundingClientRect(),mx=e.clientX-r.left,mt=x2t(mx);
+zoom=Math.max(CONFIG.ZOOM_MIN,Math.min(CONFIG.ZOOM_MAX,zoom+(e.deltaY>0?-CONFIG.ZOOM_STEP:CONFIG.ZOOM_STEP)));
+$('zoomSlider').value=zoom;$('zoomLabel').textContent=zoom.toFixed(1)+'x';
+const td=state.totalDurationMs||1,v=td/zoom;scrollMs=mt-(mx/cW())*v;clampScroll();drawTL();updSB();drawPH(curMs());},{passive:false});
+$('zoomSlider').addEventListener('input',e=>{zoom=+e.target.value;$('zoomLabel').textContent=zoom.toFixed(1)+'x';
+const td=state.totalDurationMs||1,ov=td/(zoom||1),center=scrollMs+ov/2,nv=td/zoom;scrollMs=center-nv/2;clampScroll();
+requestAnimationFrame(()=>{drawTL();updSB();drawPH(curMs());});});
+const th=$('tlScrollThumb');
+th.addEventListener('mousedown',e=>{e.stopPropagation();e.preventDefault();const bar=$('tlScrollbar');
+const mv=ev=>{const r=bar.getBoundingClientRect(),ratio=(ev.clientX-r.left)/r.width,td=state.totalDurationMs||1,v=td/zoom;
+scrollMs=Math.max(0,Math.min(ratio*td-v/2,td-v));drawTL();drawPH(curMs());updSB();};
+const up=()=>{removeEventListener('mousemove',mv);removeEventListener('mouseup',up);};
+addEventListener('mousemove',mv);addEventListener('mouseup',up);});
+$('tlScrollbar').addEventListener('click',e=>{if(e.target===th)return;const r=e.currentTarget.getBoundingClientRect();
+const ratio=(e.clientX-r.left)/r.width,td=state.totalDurationMs||1,v=td/zoom;
+scrollMs=Math.max(0,Math.min(ratio*td-v/2,td-v));drawTL();drawPH(curMs());updSB();});}
+function clipParentRange(cl){if(cl.asnIdx!=null&&state.assignments[cl.asnIdx]){const a=state.assignments[cl.asnIdx];return[a.startMs,a.endMs];}
+const sec=state.sections[cl.sectionIdx];return sec?[sec.startMs,sec.endMs]:null;}
+function clampAsnToSection(a){const sec=state.sections[a.sectionIdx];if(!sec)return;
+const du=a.endMs-a.startMs;a.startMs=Math.max(sec.startMs,Math.min(a.startMs,sec.endMs-du));a.endMs=a.startMs+du;}
+function fixClipDur(cl){cl.genDurMs=cl.genEndMs-cl.genStartMs;const S=cl.S||0;
+cl.coreDurMs=Math.max(0,cl.genDurMs-S);cl.coreStartMs=cl.genStartMs+S/2;cl.coreEndMs=cl.genEndMs-S/2;
+cl.frames=Math.round(cl.genDurMs/1000*state.techConfig.fps);}
+
+/* ################################################################################
+   #  12 · MENÚ DE ESTÉTICAS 🎨                                                   #
+   ################################################################################ */
+function openAesMenu(type,ref,px,py){aesTarget={type,ref};const m=$('aesMenu');
+m.innerHTML='<option value="-1">— '+L('Quitar','Remove')+' —</option>'+state.aesthetics.map((a,i)=>'<option value="'+i+'">'+a.name+'</option>').join('');
+const cur=type==='sec'?(state.sections[ref]||{}).aestheticIdx:type==='scn'?((sceneById(ref)||{}).aestheticIdx):(state.clipAesthetics[ref]!=null?state.clipAesthetics[ref]:-1);
+m.value=(cur!=null&&cur>=0)?cur:'-1';
+m.style.display='block';m.style.left=Math.min(px,innerWidth-180)+'px';m.style.top=Math.min(py,innerHeight-220)+'px';}
+function hideAesMenu(){$('aesMenu').style.display='none';}
+function setAesthetic(type,ref,val){val=parseInt(val);const v=(val!=null&&val>=0)?val:null;
+if(type==='sec'&&state.sections[ref])state.sections[ref].aestheticIdx=v;
+else if(type==='scn'){const s=sceneById(ref);if(s)s.aestheticIdx=v;}
+else if(type==='clip'){if(v==null)delete state.clipAesthetics[ref];else state.clipAesthetics[ref]=v;}
+renderAll();}
+function aestOfClip(c){const v=state.clipAesthetics[c.id];if(v!=null&&v>=0)return v;
+const scn=sceneById(c.sceneId);if(scn&&scn.aestheticIdx!=null&&scn.aestheticIdx>=0)return scn.aestheticIdx;
+const sec=state.sections[c.sectionIdx];if(sec&&sec.aestheticIdx!=null&&sec.aestheticIdx>=0)return sec.aestheticIdx;return -1;}
+
+/* ################################################################################
+   #  13 · NAVEGACIÓN CON RESALTADO                                               #
+   ################################################################################ */
+function activateTab(name){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===name));
+document.querySelectorAll('.tabpane').forEach(x=>x.classList.toggle('active',x.id==='tab-'+name));
+if(name==='timeline')setTimeout(()=>{drawTL();drawPH(curMs());updSB();},50);}
+function goConfigure(type,id){
+if(type==='sec'){activateTab('sections');editSec=id;renderSections();setTimeout(()=>hl('sec-item-'+id),80);}
+else if(type==='scn'){activateTab('scenes');const i=state.scenes.findIndex(s=>s.id===id);expandScn=i;renderSceneLib();setTimeout(()=>hl('scn-card-'+i),80);}
+else{activateTab('clipdesc');renderCD();setTimeout(()=>hl('clip-card-'+id),80);}}
+function hl(id){const el=$(id);if(!el)return;el.scrollIntoView({block:'center',behavior:'smooth'});
+el.classList.add('hl');setTimeout(()=>el.classList.remove('hl'),CONFIG.HIGHLIGHT_MS);}
+
+/* ################################################################################
+   #  14 · MARCADO M/S/C + MODAL DE NUEVA BARRA                                   #
+   #  ES: Al cerrar la marca se abre un modal que pide nombre, descripción y      #
+   #      estética (aplicada a la barra correspondiente). Enter guarda.           #
+   #  EN: Closing a mark opens a modal asking name, description and aesthetic     #
+   #      (applied to the matching bar). Enter saves.                             #
+   ################################################################################ */
+function handleMark(kind){const c=curMs();
+if(markState[kind]==='idle'){markState[kind]='start';markStart[kind]=c;toast('📍 '+L('INICIO','START')+' '+msToTime(c));drawPH(c);return;}
+if(c<=markStart[kind]){toast(t('toast.endStart'),'warn');return;}
+const s0=markStart[kind];markState[kind]='idle';
+openMarkModal(kind,s0,c);}
+function openMarkModal(kind,s0,e0){pendingMark={kind,s0,e0};
+$('mkTitle').textContent=kind==='sec'?t('mk.titleSec'):kind==='scn'?t('mk.titleScn'):t('mk.titleClip');
+$('mkRange').textContent=msToTime(s0)+' → '+msToTime(e0);
+$('mkName').value='';$('mkDesc').value='';
+$('mkAes').innerHTML='<option value="-1">—</option>'+state.aesthetics.map((a,i)=>'<option value="'+i+'">'+a.name+'</option>').join('');
+$('markModal').classList.add('show');setTimeout(()=>{$('mkName').focus();},50);}
+function markCancel(){pendingMark=null;$('markModal').classList.remove('show');}
+function markSave(){if(!pendingMark)return;const{kind,s0,e0}=pendingMark;
+const n=$('mkName').value.trim();if(!n){toast(t('toast.noName'),'warn');return;}
+const d=$('mkDesc').value.trim();const av=parseInt($('mkAes').value);const aes=(av!=null&&av>=0)?av:null;
+pushUndo('mark');
+if(kind==='sec'){state.sections.push({name:n,description:d,startMs:s0,endMs:e0,aestheticIdx:aes,config:{}});
+lastSecEndMs=e0;toast(t('toast.sec')+': '+n);}
+else if(kind==='scn'){if(!state.sections.length){toast(t('toast.noSec'),'warn');markCancel();return;}
+const sc={id:scnId++,name:n,description:d,aestheticIdx:aes,config:{crossFLF:false}};state.scenes.push(sc);
+const touched=state.sections.map((s,i)=>({s,i})).filter(o=>s0<o.s.endMs&&e0>o.s.startMs);
+if(!touched.length)toast(t('toast.noSectionForScene'),'warn');
+touched.forEach(o=>state.assignments.push({sceneId:sc.id,sectionIdx:o.i,startMs:Math.max(s0,o.s.startMs),endMs:Math.min(e0,o.s.endMs),overrides:{}}));
+if(touched.length>1)toast(t('toast.cross'),'warn');else toast(t('toast.scn')+': '+n);}
+else{const secIdx=state.sections.findIndex(s=>s0>=s.startMs&&s0<s.endMs);
+const asnIdx=state.assignments.findIndex(a=>s0>=a.startMs&&s0<a.endMs);
+const cl=makeClip(nextClipId(),secIdx>=0?secIdx:0,asnIdx>=0?state.assignments[asnIdx].sceneId:null,asnIdx>=0?asnIdx:null,s0,e0,Dms(),0);
+cl.manual=true;state.clips.push(cl);
+if(aes!=null)state.clipAesthetics[cl.id]=aes;
+relinkClips();toast(t('toast.clips')+': 1');}
+markCancel();renderAll();}
+
+/* ################################################################################
+   #  15 · SELECTOR DE TIEMPO ⏱️                                                  #
+   ################################################################################ */
+function openTP(inp){tpTarget=inp;const ms=timeToMs(inp.value);
+tpV={min:Math.floor(ms/60000),sec:Math.floor(ms%60000/1000),ms:Math.floor(ms%1000)};
+tpUpd();$('timePickerModal').classList.add('show');}
+function tpAdj(f,d){if(f==='min')tpV.min=Math.max(0,Math.min(99,tpV.min+d));
+else if(f==='sec')tpV.sec=Math.max(0,Math.min(59,tpV.sec+d));
+else tpV.ms=Math.max(0,Math.min(999,tpV.ms+d));tpUpd();}
+function tpUpd(){$('tpMin').textContent=String(tpV.min).padStart(2,'0');
+$('tpSec').textContent=String(tpV.sec).padStart(2,'0');$('tpMs').textContent=String(tpV.ms).padStart(3,'0');
+$('tpPreview').textContent=msToTime(tpV.min*60000+tpV.sec*1000+tpV.ms);}
+function tpAccept(){if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
+if(tpTarget){tpTarget.value=msToTime(tpV.min*60000+tpV.sec*1000+tpV.ms);
+if(tpTarget.id==='totalDuration'){state.totalDurationMs=tpV.min*60000+tpV.sec*1000+tpV.ms;
+$('tlTotalTime').textContent=msToTime(state.totalDurationMs);renderAll();}}
+$('timePickerModal').classList.remove('show');}
+const tpCancel=()=>$('timePickerModal').classList.remove('show');
+function holdable(btn,fn){let to=null,n=0;
+const tick=()=>{fn();n++;to=setTimeout(tick,n<5?CONFIG.HOLD_SPEEDS[0]:n<20?CONFIG.HOLD_SPEEDS[1]:CONFIG.HOLD_SPEEDS[2]);};
+const start=e=>{e.preventDefault();fn();n=1;to=setTimeout(tick,CONFIG.HOLD_START_MS);};
+const stop=()=>{clearTimeout(to);n=0;};
+btn.addEventListener('mousedown',start);btn.addEventListener('mouseup',stop);btn.addEventListener('mouseleave',stop);
+btn.addEventListener('touchstart',start,{passive:false});btn.addEventListener('touchend',stop);}
+function initTP(){
+document.querySelectorAll('.tp-arrows button').forEach(b=>{const[f,d]=b.dataset.tp.split(':');holdable(b,()=>tpAdj(f,+d));});
+document.querySelectorAll('.tp-val').forEach(v=>{const f=v.dataset.f;
+v.addEventListener('dblclick',()=>{if(v.querySelector('input'))return;
+const inp=document.createElement('input');inp.type='number';inp.value=tpV[f];
+v.textContent='';v.appendChild(inp);inp.focus();inp.select();
+const commit=()=>{const val=parseInt(inp.value)||0;
+tpV[f]=f==='min'?Math.max(0,Math.min(99,val)):f==='sec'?Math.max(0,Math.min(59,val)):Math.max(0,Math.min(999,val));
+tpUpd();};
+inp.addEventListener('blur',commit);inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();});});
+v.addEventListener('wheel',e=>{e.preventDefault();tpAdj(f,e.deltaY<0?(f==='ms'?10:1):(f==='ms'?-10:-1));});
+v.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;
+if(e.key==='ArrowUp'){e.preventDefault();tpAdj(f,f==='ms'?10:1);}
+if(e.key==='ArrowDown'){e.preventDefault();tpAdj(f,f==='ms'?-10:-1);}});});}
+
+/* ################################################################################
+   #  16 · SECCIONES                                                              #
+   ################################################################################ */
+function addSection(){const n=$('secName').value.trim();if(!n){toast(t('toast.noName'),'warn');return;}
+const mode=$('secMode').value;let s0,e0;
+if(mode==='time'){s0=timeToMs($('secStart').value);e0=timeToMs($('secEnd').value);}
+else{const a=+($('secStartBeat').value)||1,b=+($('secEndBeat').value)||1;s0=evT(a);e0=evT(b);}
+if(e0<=s0){toast(t('toast.endStart'),'warn');return;}pushUndo('sec');
+state.sections.push({name:n,description:$('secDesc').value.trim(),startMs:s0,endMs:e0,aestheticIdx:null,config:{}});
+lastSecEndMs=e0;$('secName').value='';$('secDesc').value='';
+if(mode==='time')$('secStart').value=msToTime(e0);renderAll();toast(t('toast.sec')+': '+n);}
+function rmSec(i){pushUndo('sec');state.sections.splice(i,1);
+state.assignments=state.assignments.filter(a=>a.sectionIdx!==i);
+state.assignments.forEach(a=>{if(a.sectionIdx>i)a.sectionIdx--;});
+state.clips.forEach(c=>{if(c.sectionIdx===i)c.sectionIdx=Math.max(0,i-1);});
+renderAll();}
+function startEditSec(i){editSec=i;renderSections();}
+function saveEditSec(i){const n=$('editSecName'+i),d=$('editSecDesc'+i);
+if(n&&n.value.trim()){state.sections[i].name=n.value.trim();state.sections[i].description=d?d.value.trim():'';}
+editSec=-1;renderAll();}
+function renderSections(){
+const scnC=i=>state.assignments.filter(a=>a.sectionIdx===i).length;
+const clipC=i=>state.clips.filter(c=>c.sectionIdx===i).length;
+$('sectionsList').innerHTML=state.sections.map((s,i)=>{const col=CONFIG.COLORS.sections[i%CONFIG.COLORS.sections.length];
+if(editSec===i)return'<div class="sec-list-item" id="sec-item-'+i+'" style="border-left-color:'+col+'"><div class="row">'+
+'<div class="field"><label>'+t('sec.name')+'</label><input id="editSecName'+i+'" value="'+s.name.replace(/"/g,'&quot;')+'"></div>'+
+'<div class="field" style="flex:2"><label>'+t('sec.desc')+'</label><input id="editSecDesc'+i+'" value="'+(s.description||'').replace(/"/g,'&quot;')+'"></div>'+
+'<button class="primary small" onclick="saveEditSec('+i+')">💾</button><button class="small" onclick="editSec=-1;renderSections()">✕</button></div></div>';
+return'<div class="sec-list-item" id="sec-item-'+i+'" style="border-left-color:'+col+'"><h4 style="color:'+col+'">'+s.name+
+' <span style="cursor:pointer;color:var(--cyan)" onclick="startEditSec('+i+')">✎</span>'+
+' <span class="x" style="float:right;cursor:pointer" onclick="rmSec('+i+')">✕</span></h4>'+
+(s.description?'<div class="desc">'+s.description+'</div>':'')+
+'<div class="meta">'+msToTime(s.startMs)+' → '+msToTime(s.endMs)+' · '+scnC(i)+' '+t('sec.scenes')+' · '+clipC(i)+' '+t('sec.clips')+'</div></div>';}).join('')||'—';}
+const evT=n=>{const e=state.events.find(x=>x.index===n);return e?e.timeMs:(state.events.length?state.events[state.events.length-1].timeMs:0);};
+
+/* ################################################################################
+   #  17 · ESCENAS Y ASIGNACIONES                                                 #
+   ################################################################################ */
+function openSceneEditor(i){editScn=i;$('scnAesthetic').innerHTML='<option value="-1">—</option>'+state.aesthetics.map((a,ai)=>'<option value="'+ai+'">'+a.name+'</option>').join('');
+if(i>=0){const s=state.scenes[i];$('sceneEditTitle').textContent=s.name;$('scnName').value=s.name;
+$('scnDesc').value=s.description||'';$('scnAesthetic').value=s.aestheticIdx!=null?s.aestheticIdx:-1;
+$('scnTargetMode').value=s.config.targetDuration!=null?'custom':'inherit';$('scnTargetVal').value=s.config.targetDuration||8;
+$('scnTargetField').style.display=s.config.targetDuration!=null?'':'none';
+$('scnOvMode').value=s.config.overlapSec!=null?'custom':'inherit';$('scnOvVal').value=s.config.overlapSec||0;
+$('scnOvField').style.display=s.config.overlapSec!=null?'':'none';
+$('scnFLF').checked=s.config.firstLastFrame===true;$('scnCross').checked=s.config.crossFLF===true;}
+else{$('sceneEditTitle').textContent=t('scn.create');$('scnName').value='';$('scnDesc').value='';$('scnAesthetic').value=-1;
+$('scnTargetMode').value='inherit';$('scnTargetField').style.display='none';
+$('scnOvMode').value='inherit';$('scnOvField').style.display='none';$('scnFLF').checked=false;$('scnCross').checked=false;}
+$('sceneEditorPanel').style.display='block';}
+const closeSceneEditor=()=>{$('sceneEditorPanel').style.display='none';editScn=-1;};
+function saveSceneEdit(){const n=$('scnName').value.trim();if(!n){toast(t('toast.noName'),'warn');return;}
+const cfg={targetDuration:$('scnTargetMode').value==='custom'?(+($('scnTargetVal').value)||8):null,
+overlapSec:$('scnOvMode').value==='custom'?(+($('scnOvVal').value)||0):null,
+firstLastFrame:$('scnFLF').checked?true:null,crossFLF:$('scnCross').checked?true:null};
+const d={name:n,description:$('scnDesc').value.trim(),aestheticIdx:(v=>v>=0?v:null)(parseInt($('scnAesthetic').value)),config:cfg};
+if(editScn>=0)Object.assign(state.scenes[editScn],d);else{d.id=scnId++;state.scenes.push(d);}
+closeSceneEditor();renderAll();toast(t('toast.scn')+': '+n);}
+function rmScene(i){const id=state.scenes[i].id;pushUndo('scn');state.scenes.splice(i,1);
+state.assignments=state.assignments.filter(a=>a.sceneId!==id);
+state.clips.forEach(c=>{if(c.sceneId===id){c.sceneId=null;c.asnIdx=null;}});renderAll();}
+function renderSceneLib(){$('sceneLibList').innerHTML=state.scenes.map((s,i)=>{
+const col=CONFIG.COLORS.scenes[i%CONFIG.COLORS.scenes.length];
+const uses=state.assignments.filter(a=>a.sceneId===s.id).length;const open=expandScn===i;
+return'<div class="scn-card" id="scn-card-'+i+'" style="border-left-color:'+col+'">'+
+'<h4 style="font-size:12px;color:'+col+'">🎬 '+s.name+' <span style="cursor:pointer;color:var(--cyan)" onclick="openSceneEditor('+i+')">✎</span> <span class="x" style="float:right;cursor:pointer" onclick="rmScene('+i+')">✕</span></h4>'+
+'<div class="tags">'+(s.aestheticIdx!=null&&s.aestheticIdx>=0?'<span class="chip">🎨 '+state.aesthetics[s.aestheticIdx].name+'</span>':'')+
+'<span class="chip">⏱ '+(s.config.targetDuration!=null?s.config.targetDuration+'s':L('hereda','inherit'))+'</span>'+
+'<span class="chip">⇄ '+(s.config.overlapSec!=null?s.config.overlapSec+'s':L('hereda','inherit'))+'</span>'+
+(s.config.firstLastFrame?'<span class="chip">🔗 FLF</span>':'')+
+(s.config.crossFLF?'<span class="chip">🔗 '+L('cruzado','cross')+'</span>':'')+
+'<span class="chip">'+uses+' '+t('scn.uses')+'</span></div>'+
+(s.description?'<div class="d'+(open?' open':'')+'">'+s.description+'</div>'+
+(s.description.length>90?'<button class="small" onclick="expandScn='+(open?-1:i)+';renderSceneLib()">'+t(open?'scn.less':'scn.more')+'</button>':''):'')+
+'</div>';}).join('')||'—';}
+function updateAssignSel(){$('assignSection').innerHTML=state.sections.map((s,i)=>'<option value="'+i+'">'+s.name+'</option>').join('');
+$('assignScene').innerHTML=state.scenes.map(s=>'<option value="'+s.id+'">'+s.name+'</option>').join('');}
+function addAssignment(){const si=parseInt($('assignSection').value),id=parseInt($('assignScene').value);
+let s0=timeToMs($('assignStart').value),e0=timeToMs($('assignEnd').value);
+if(isNaN(si)||isNaN(id)){toast('⚠','warn');return;}
+const sec=state.sections[si];if(sec){s0=Math.max(s0,sec.startMs);e0=Math.min(e0,sec.endMs);}
+if(e0<=s0){toast(t('toast.endStart'),'warn');return;}
+pushUndo('asn');state.assignments.push({sceneId:id,sectionIdx:si,startMs:s0,endMs:e0,overrides:{}});
+renderAll();toast(t('toast.asn'));}
+function rmAsn(i){pushUndo('asn');state.assignments.splice(i,1);
+state.clips.forEach(c=>{if(c.asnIdx===i)c.asnIdx=null;else if(c.asnIdx>i)c.asnIdx--;});
+renderAll();}
+function renderAssignments(){const si=parseInt($('assignSection').value)||0;
+$('assignmentList').innerHTML=state.assignments.map((a,i)=>a.sectionIdx===si?
+'<div class="chip">🎬 '+(sceneById(a.sceneId)?sceneById(a.sceneId).name:'?')+' '+msToTime(a.startMs)+'→'+msToTime(a.endMs)+' <span class="x" onclick="rmAsn('+i+')">✕</span></div>':'').join('')||'—';}
+
+/* ################################################################################
+   #  18 · GENERACIÓN DE CLIPS (partición balanceada, techo duro)                 #
+   ################################################################################ */
+function resolveCfg(asn,scn){const g=state.globalConfig;
+return{td:(asn&&asn.overrides&&asn.overrides.targetDuration!=null)?asn.overrides.targetDuration:(scn&&scn.config.targetDuration!=null)?scn.config.targetDuration:g.targetDuration,
+ov:(asn&&asn.overrides&&asn.overrides.overlapSec!=null)?asn.overrides.overlapSec:(scn&&scn.config.overlapSec!=null)?scn.config.overlapSec:g.overlapSec,
+flf:(scn&&scn.config.firstLastFrame!=null)?scn.config.firstLastFrame:g.firstLastFrame,
+snap:g.snapToBeat,th:g.snapThreshold,min:g.minClipOn?g.minClipDur*1000:0};}
+function partition(s0,e0,cfg,beats){const D=Math.max(500,cfg.td*1000),range=e0-s0;if(range<=0)return{clips:[],warnMin:false};
+let n=Math.max(1,Math.ceil(range/D-1e-9));const base=range/n;
+if(cfg.min&&base<cfg.min-1)return{clips:[{startMs:s0,endMs:e0,S:0}],warnMin:true};
+const minSeg=Math.max(cfg.min||0,CONFIG.MIN_SEG_FLOOR);
+const bounds=[s0];
+for(let i=1;i<n;i++){let b=s0+i*base;
+if(cfg.snap&&beats.length){let best=null,bd=cfg.th||500;
+for(const bt of beats){if(bt.timeMs<=b&&bt.timeMs>bounds[i-1]){const d=b-bt.timeMs;if(d<bd){bd=d;best=bt;}}}
+if(best){const cand=best.timeMs,segA=cand-bounds[i-1];
+if(segA>=minSeg&&segA<=D&&(base+(b-cand))<=D)b=cand;}}
+bounds.push(b);}
+bounds.push(e0);
+let S=Math.max(0,cfg.ov*1000);if(S>=base)S=Math.max(0,base-500);
+const out=[];for(let i=0;i<bounds.length-1;i++){const a=bounds[i],b=bounds[i+1];if(b<=a)continue;
+out.push({startMs:a,endMs:b,S});}
+return{clips:out,warnMin:false};}
+function makeClip(id,secIdx,sceneId,asnIdx,s0,e0,D,S){S=S||0;
+return{id,sectionIdx:secIdx,sceneId:sceneId||null,asnIdx:asnIdx!=null?asnIdx:null,manual:false,
+startMs:s0,endMs:e0,genStartMs:s0,genEndMs:e0,
+coreStartMs:s0+S/2,coreEndMs:e0-S/2,coreDurMs:(e0-s0)-S,genDurMs:e0-s0,S,
+frames:Math.round((e0-s0)/1000*state.techConfig.fps),D:D||Dms(),firstLastFrame:false,firstFrameFrom:null};}
+const nextClipId=()=>state.clips.reduce((m,c)=>Math.max(m,c.id),0)+1;
+function genClips(){readCfg();if(!state.sections.length){toast(t('toast.noSec'),'warn');return;}
+pushUndo('gen');
+const oldPool={};
+state.clips.forEach(c=>{if(c.manual)return;const k=c.sectionIdx+'|'+(c.sceneId||0);
+(oldPool[k]=oldPool[k]||[]).push({desc:state.clipDescriptions[c.id],aes:state.clipAesthetics[c.id]});});
+let out=[];
+state.sections.forEach((sec,si)=>{
+const asns=state.assignments.filter(a=>a.sectionIdx===si).sort((a,b)=>a.startMs-b.startMs);
+const ranges=[];let cur=sec.startMs;
+asns.forEach(a=>{if(a.startMs>cur)ranges.push({s:cur,e:a.startMs,asn:null,asnIdx:null});
+ranges.push({s:a.startMs,e:a.endMs,asn:a,asnIdx:state.assignments.indexOf(a)});
+cur=Math.max(cur,a.endMs);});
+if(cur<sec.endMs)ranges.push({s:cur,e:sec.endMs,asn:null,asnIdx:null});
+ranges.forEach(rg=>{const scn=rg.asn?sceneById(rg.asn.sceneId):null;
+const cfg=resolveCfg(rg.asn,scn);
+const beats=state.events.filter(e=>e.timeMs>=rg.s&&e.timeMs<rg.e);
+const res=partition(rg.s,rg.e,cfg,beats);
+if(res.warnMin)toast(t('toast.minW'),'warn');
+const key=si+'|'+(scn?scn.id:0);
+res.clips.forEach(pc=>{const meta=(oldPool[key]||[]).shift()||{};
+const cl=makeClip(0,si,scn?scn.id:null,rg.asnIdx,pc.startMs,pc.endMs,cfg.td*1000,pc.S);
+cl._meta=meta;out.push(cl);});});});
+state.clips.filter(c=>c.manual).forEach(mc=>{mc._meta={desc:state.clipDescriptions[mc.id],aes:state.clipAesthetics[mc.id]};out.push(mc);});
+out.sort((a,b)=>a.startMs-b.startMs);
+out.forEach((c,i)=>c.id=i+1);
+state.clips=out;state.clipDescriptions={};state.clipAesthetics={};
+out.forEach(c=>{const m=c._meta||{};if(m.desc!=null)state.clipDescriptions[c.id]=m.desc;
+if(m.aes!=null&&m.aes>=0)state.clipAesthetics[c.id]=m.aes;delete c._meta;});
+relinkClips();renderAll();toast('🎬 '+state.clips.length+' '+t('toast.clips'));}
+/* ES: FLF nunca encadena un clip automático con uno manual.
+   EN: FLF never chains an auto clip with a manual one. */
+function relinkClips(){const sorted=[...state.clips].sort((a,b)=>a.startMs-b.startMs);
+sorted.forEach(c=>{c.firstFrameFrom=null;c.firstLastFrame=false;});
+for(let i=1;i<sorted.length;i++){const a=sorted[i-1],b=sorted[i];let link=false;
+if(a.manual===b.manual){
+if(!a.sceneId&&!b.sceneId&&a.sectionIdx===b.sectionIdx)link=state.globalConfig.firstLastFrame;
+else if(a.sceneId&&a.sceneId===b.sceneId){const scn=sceneById(a.sceneId);
+if(a.asnIdx!=null&&a.asnIdx===b.asnIdx){const cfg=resolveCfg(state.assignments[a.asnIdx],scn);link=!!cfg.flf;}
+else if(scn&&scn.config.crossFLF)link=true;}}
+if(link){b.firstFrameFrom=a.id;a.firstLastFrame=true;}}}
+
+/* ################################################################################
+   #  19 · DESCRIPCIÓN DE CLIPS                                                   #
+   ################################################################################ */
+function renderCD(){const tf=state.clips.reduce((a,c)=>a+c.frames,0);
+$('dashCD').innerHTML='<span>'+t('dash.clips')+': <b>'+state.clips.length+'</b></span><span>'+t('dash.frames')+': <b>'+tf+'</b></span><span>'+t('dash.script')+': <b>'+state.clips.filter(c=>(state.clipDescriptions[c.id]||'').trim()).length+'</b></span><span>'+t('dash.pending')+': <b>'+state.clips.filter(c=>!(state.clipDescriptions[c.id]||'').trim()).length+'</b></span>';
+$('clipDescList').innerHTML=state.clips.map(c=>{const av=aestOfClip(c);
+const secName=(state.sections[c.sectionIdx]||{}).name||'—';
+const scn=sceneById(c.sceneId);
+return'<div class="clip-card" id="clip-card-'+c.id+'"><h4>🎬 CLIP '+String(c.id).padStart(2,'0')+(c.manual?' · ✍ '+L('manual','manual'):'')+' — '+secName+(scn?' → '+scn.name:'')+'</h4>'+
+'<div class="meta">Core '+msToTime(c.coreStartMs)+'→'+msToTime(c.coreEndMs)+' ('+fmtDur(c.coreDurMs)+') · Gen '+msToTime(c.genStartMs)+'→'+msToTime(c.genEndMs)+' ('+c.frames+'f)'+(c.genDurMs>(c.D||0)+1?' ⚠':'')+'</div>'+
+'<div class="field" style="margin-bottom:6px"><label>🎨 '+t('scn.aesthetic')+' ('+(av>=0?state.aesthetics[av].name:'—')+')</label>'+
+'<select onchange="setAesthetic(\'clip\','+c.id+',this.value)"><option value="-1">—</option>'+state.aesthetics.map((a,i)=>'<option value="'+i+'"'+(i===av?' selected':'')+'>'+a.name+'</option>').join('')+'</select></div>'+
+'<div class="field"><label>📝</label><textarea rows="3" onchange="state.clipDescriptions['+c.id+']=this.value">'+(state.clipDescriptions[c.id]||'')+'</textarea></div>'+
+'<div class="btn-row" style="margin-top:6px"><button class="primary small" onclick="cpClip('+c.id+')">📋 prompt</button></div></div>';}).join('')||'—';}
+function buildCP(id){const c=state.clips.find(x=>x.id===id);if(!c)return'';const A=[];
+if(state.universalPrompt.trim()){A.push(state.universalPrompt.trim());A.push('');}
+const av=aestOfClip(c);if(av>=0){A.push('[ESTÉTICA: '+state.aesthetics[av].name+']');A.push(state.aesthetics[av].content);A.push('');}
+const scn=sceneById(c.sceneId);if(scn&&scn.description){A.push('[ESCENA: '+scn.name+']');A.push(scn.description);A.push('');}
+A.push('[CLIP '+String(c.id).padStart(2,'0')+(c.manual?' MANUAL':'')+' — '+((state.sections[c.sectionIdx]||{}).name||'')+(scn?' → '+scn.name:'')+']');
+A.push('Core: '+msToTime(c.coreStartMs)+'→'+msToTime(c.coreEndMs)+' ('+fmtDur(c.coreDurMs)+')');
+A.push('Gen: '+msToTime(c.genStartMs)+'→'+msToTime(c.genEndMs)+' ('+c.frames+' frames)');
+if(c.firstFrameFrom)A.push('First-frame: last frame CLIP '+String(c.firstFrameFrom).padStart(2,'0'));
+const d=state.clipDescriptions[c.id];if(d&&d.trim()){A.push('');A.push('[SCRIPT]');A.push(d.trim());}
+const p=[getResStr()+' | '+state.techConfig.fps+'fps | '+c.frames+'f'];
+if(state.techConfig.includeCfg)p.push('CFG '+state.techConfig.cfgScale);
+if(state.techConfig.includeSteps)p.push('Steps '+state.techConfig.steps);
+A.push('');A.push('[PARAM] '+p.join(' | '));return A.join('\n');}
+const cpClip=id=>cp(buildCP(id));
+
+/* ################################################################################
+   #  20 · RAIL INFERIOR (clips manuales en grupo propio)                         #
+   ################################################################################ */
+function railAll(open){['sec','scn','man'].forEach(k=>railOpen[k]=open);
+state.scenes.forEach(s=>railOpen['scn'+s.id]=open);
+state.sections.forEach((s,i)=>railOpen['nosec'+i]=open);renderRail();}
+function chip(kind,label,ms,ref){return'<span class="rail-chip">'+
+'<button onclick="seekTo('+ms+')">▶</button>'+
+'<button onclick="goConfigure(\''+kind+'\','+ref+')">⚙</button>'+
+'<button onclick="openAesMenu(\''+kind+'\','+ref+',event.clientX,event.clientY)">🎨</button>'+
+'<span>'+label+'</span></span>';}
+function renderRail(){const cur=curMs();let h='';
+h+='<div class="rail-group"><div class="rail-head" onclick="railOpen.sec=!railOpen.sec;renderRail()">▸ 📑 '+t('dash.sections')+' ('+state.sections.length+')</div>';
+if(railOpen.sec)h+='<div class="rail-body">'+state.sections.map((s,i)=>chip('sec',s.name+' '+msToTime(s.startMs).slice(0,5),s.startMs,i)).join('')+'</div></div>';
+h+='<div class="rail-group"><div class="rail-head" onclick="railOpen.scn=!railOpen.scn;renderRail()">▸ 🎬 '+t('dash.scenes')+' ('+state.scenes.length+')</div>';
+if(railOpen.scn)h+='<div class="rail-body">'+state.scenes.map(s=>{const fa=state.assignments.find(a=>a.sceneId===s.id);
+return chip('scn',s.name+' ('+state.assignments.filter(a=>a.sceneId===s.id).length+')',fa?fa.startMs:0,s.id);}).join('')+'</div></div>';
+const groups=[];
+state.scenes.forEach(s=>{const cl=state.clips.filter(c=>c.sceneId===s.id&&!c.manual);
+if(cl.length)groups.push({key:'scn'+s.id,name:'🎬 '+s.name,color:CONFIG.COLORS.scenes[state.scenes.indexOf(s)%CONFIG.COLORS.scenes.length],clips:cl});});
+state.sections.forEach((sec,i)=>{const cl=state.clips.filter(c=>c.sectionIdx===i&&!c.sceneId&&!c.manual);
+if(cl.length)groups.push({key:'nosec'+i,name:'📑 '+sec.name+' · '+t('rail.noScene'),color:CONFIG.COLORS.sections[i%CONFIG.COLORS.sections.length],clips:cl});});
+const man=state.clips.filter(c=>c.manual);
+if(man.length)groups.push({key:'man',name:'✍ '+t('rail.manual'),color:CONFIG.COLORS.manual,clips:man});
+groups.forEach(g=>{if(railOpen[g.key]==null)railOpen[g.key]=g.clips.some(c=>c.startMs<=cur&&cur<=c.endMs);
+const over=g.clips.filter(c=>c.genDurMs>(c.D||0)+1).length;
+const nos=g.clips.filter(c=>!(state.clipDescriptions[c.id]||'').trim()).length;
+const noa=g.clips.filter(c=>aestOfClip(c)<0).length;
+h+='<div class="rail-group"><div class="rail-head" style="border-left:3px solid '+g.color+'" onclick="railOpen[\''+g.key+'\']=!railOpen[\''+g.key+'\'];renderRail()">'+(railOpen[g.key]?'▾':'▸')+' '+g.name+' ('+g.clips.length+')'+
+(over?' <span style="color:var(--danger)">⚠'+over+'</span>':'')+(nos?' <span style="color:var(--amber)">✍'+nos+'</span>':'')+(noa?' <span style="color:var(--dim)">🎨'+noa+'</span>':'')+'</div>';
+if(railOpen[g.key])h+='<div class="rail-body">'+g.clips.map(c=>chip('clip','C'+String(c.id).padStart(2,'0')+' '+msToTime(c.startMs).slice(0,5)+(c.genDurMs>(c.D||0)+1?'⚠':''),c.startMs,c.id)).join('')+'</div></div>';});
+$('rail').innerHTML=h||'—';}
+
+/* ################################################################################
+   #  21 · BEATS + EXPORT CSV                                                     #
+   ################################################################################ */
+function renderBA(){if(!state.events.length){$('beatsStats').innerHTML='—';$('beatsBody').innerHTML='';return;}
+const iv=[];for(let i=1;i<state.events.length;i++)iv.push(state.events[i].timeMs-state.events[i-1].timeMs);
+const avg=iv.length?iv.reduce((a,b)=>a+b,0)/iv.length:0;
+const reg=avg?Math.max(0,100-Math.sqrt(iv.reduce((a,b)=>a+(b-avg)**2,0)/iv.length)/avg*100):0;
+$('beatsStats').innerHTML='<div class="dash"><span>Beats: <b>'+state.events.length+'</b></span><span>BPM: <b>'+(state.bpm||'—')+'</b></span><span>Reg: <b>'+reg.toFixed(0)+'%</b></span></div>';
+$('beatsBody').innerHTML=state.events.map((e,i)=>'<tr><td>'+e.index+'</td><td>'+msToTime(e.timeMs)+'</td><td>'+(i?fmtDur(e.timeMs-state.events[i-1].timeMs):'—')+'</td></tr>').join('');}
+function exportBeatsCSV(){if(!state.events.length){toast('⚠','warn');return;}
+dl(sn(state.projectName)+'_beats.csv',state.events.map(e=>(e.timeMs/1000)+','+e.index).join('\n'));toast(t('toast.csvE'));}
+
+/* ################################################################################
+   #  22 · CREATIVO (Contexto para IA ampliado / expanded AI Context)             #
+   ################################################################################ */
+function createAesthetic(){editAes=-1;$('aesEditTitle').textContent=t('cr.create');$('aesName').value='';$('aesContent').value='';$('aestheticEditor').style.display='block';}
+function editAesthetic(i){editAes=i;const a=state.aesthetics[i];$('aesEditTitle').textContent=a.name;$('aesName').value=a.name;$('aesContent').value=a.content;$('aestheticEditor').style.display='block';}
+function saveAestheticEdit(){const n=$('aesName').value.trim()||'Estética';
+if(editAes>=0)state.aesthetics[editAes]={name:n,content:$('aesContent').value};
+else state.aesthetics.push({name:n,content:$('aesContent').value});
+closeAE();renderAll();}
+const closeAE=()=>{$('aestheticEditor').style.display='none';};
+function rmAes(i){state.aesthetics.splice(i,1);renderAll();}
+function expAes(i){const a=state.aesthetics[i];dl('aesthetic_'+sn(a.name)+'.txt','===AESTHETIC v1===\nNAME='+a.name+'\n===CONTENT===\n'+a.content+'\n===END===');toast(t('toast.aesE'));}
+function renderAesthetics(){$('aestheticsList').innerHTML=state.aesthetics.map((a,i)=>'<div class="chip">🎨 '+a.name+' <span style="cursor:pointer;color:var(--cyan)" onclick="editAesthetic('+i+')">✎</span> <span style="cursor:pointer;color:var(--green)" onclick="expAes('+i+')">⬇</span> <span class="x" onclick="rmAes('+i+')">✕</span></div>').join('')||'—';}
+function exportUP(){const ti=$('upTitle').value.trim()||'Prompt Universal';
+dl(sn(ti)+' - Prompt Universal.txt','===UNIVERSAL_PROMPT v1===\nTITLE='+ti+'\n===CONTENT===\n'+$('universalPrompt').value+'\n===END===');toast(t('toast.upE'));}
+function importUP(tx){const m1=tx.match(/TITLE=(.*)/),m2=tx.match(/===CONTENT===\n([\s\S]*?)\n===END===/);
+if(!m1||!m2){toast('⚠','err');return;}$('upTitle').value=m1[1].trim();$('universalPrompt').value=m2[1];
+state.universalPromptTitle=m1[1].trim();state.universalPrompt=m2[1];toast(t('toast.upI'));}
+function insertAIContext(){const tx=LANG==='es'?
+`\n[CONTEXTO PARA IA — LEER ANTES DE PROCESAR]
+Documento: informe de producción de "Beat Calculator for AI Video" (By Seny Clever, v1).
+Propósito: servir como dirección cinematográfica completa para generar un videoclip con IA.
+
+JERARQUÍA: CANCIÓN ➜ SECCIÓN (estructura musical) ➜ ESCENA (unidad visual) ➜ CLIP (segmento de video a generar).
+
+SECCIONES DEL INFORME:
+• CONTEXTO GLOBAL: BPM, duración total, resolución, FPS, CFG/Steps (si aplican), duración objetivo, solapamiento y cobertura.
+• PROMPT UNIVERSAL: base de estilo que se ANTEPONE a cada clip.
+• ESTÉTICAS: biblioteca de estilos visuales reutilizables.
+• SECCIONES / ESCENAS / CLIPS: listado jerárquico con tiempos, guiones y estéticas.
+• RESUMEN: totales de clips, frames y cobertura.
+
+CAMPOS DE CADA CLIP:
+• Core: rango usable en el montaje final (sin márgenes).
+• Gen: rango total que debe generar la IA (incluye solapamiento). Es el techo exacto.
+• First-frame: si indica "last frame CLIP XX", usar ese frame como imagen inicial (continuidad FLF).
+• SCRIPT: guion visual (escena, cámara, luz, acción).
+• AESTHETIC: estética asignada. Jerarquía de resolución: clip > escena > sección.
+• PARÁMETROS: resolución, fps, frames y CFG/Steps si están activos.
+• Los clips marcados como MANUAL siguen las mismas reglas que los automáticos.
+
+REGLAS PARA GENERAR:
+1. Un prompt por clip: PROMPT UNIVERSAL + ESTÉTICA + dirección de ESCENA + SCRIPT + PARÁMETROS.
+2. Respeta la duración Gen en segundos o frames: no la excedas nunca.
+3. Mantén coherencia de estilo entre clips de la misma escena.
+4. Si hay First-frame, condiciona la generación a esa imagen inicial.
+5. Usa el SCRIPT como descripción principal de la toma; la estética solo define el estilo.
+`:
+`\n[AI CONTEXT — READ BEFORE PROCESSING]
+Document: production report from "Beat Calculator for AI Video" (By Seny Clever, v1).
+Purpose: act as complete cinematic direction to generate a music video with AI.
+
+HIERARCHY: SONG ➜ SECTION (musical structure) ➜ SCENE (visual unit) ➜ CLIP (video segment to generate).
+
+REPORT SECTIONS:
+• GLOBAL CONTEXT: BPM, total duration, resolution, FPS, CFG/Steps (if applicable), target duration, overlap and coverage.
+• UNIVERSAL PROMPT: style base that PRECEDES every clip.
+• AESTHETICS: library of reusable visual styles.
+• SECTIONS / SCENES / CLIPS: hierarchical list with times, scripts and aesthetics.
+• SUMMARY: clip totals, frames and coverage.
+
+FIELDS OF EACH CLIP:
+• Core: usable range in the final edit (without margins).
+• Gen: full range the AI must generate (includes overlap). It is the exact ceiling.
+• First-frame: if it says "last frame CLIP XX", use that frame as initial image (FLF continuity).
+• SCRIPT: visual script (scene, camera, light, action).
+• AESTHETIC: assigned aesthetic. Resolution hierarchy: clip > scene > section.
+• PARAMETERS: resolution, fps, frames and CFG/Steps when active.
+• Clips flagged MANUAL follow the same rules as automatic ones.
+
+RULES TO GENERATE:
+1. One prompt per clip: UNIVERSAL PROMPT + AESTHETIC + SCENE direction + SCRIPT + PARAMETERS.
+2. Respect the Gen duration in seconds or frames: never exceed it.
+3. Keep style coherence among clips of the same scene.
+4. If First-frame exists, condition generation to that initial image.
+5. Use SCRIPT as the main shot description; the aesthetic only defines style.
+`;
+$('notepad').value=$('notepad').value.trim()+'\n'+tx;state.notepad=$('notepad').value;toast(t('toast.ai'));}
+
+/* ################################################################################
+   #  23 · LECTURA/ESCRITURA DE CONFIG                                            #
+   ################################################################################ */
+function onResChange(){$('customResField').style.display=$('techRes').value==='custom'?'':'none';}
+function getResStr(){if(state.techConfig.res==='custom')return state.techConfig.customW+'x'+state.techConfig.customH;return state.techConfig.res;}
+function readCfg(){const b=parseFloat($('bpm').value);state.bpm=isNaN(b)?null:b;
+state.projectName=$('projectName').value||'Proyecto';state.notepad=$('notepad').value;
+state.universalPrompt=$('universalPrompt').value;state.universalPromptTitle=$('upTitle').value.trim();
+state.techConfig={res:$('techRes').value,fps:+$('techFps').value||24,cfgScale:+$('techCfg').value||6,steps:+$('techSteps').value||25,
+includeCfg:$('cfgChk').checked,includeSteps:$('stepsChk').checked,
+customW:+($('customW').value)||state.techConfig.customW||1920,customH:+($('customH').value)||state.techConfig.customH||1080};
+state.globalConfig={targetDuration:+$('gTargetDur').value||10,overlapSec:+$('gOverlapSec').value||0,
+snapToBeat:$('gSnap').checked,snapThreshold:+$('gSnapTh').value||500,firstLastFrame:$('gFLF').checked,
+minClipDur:+$('gMinDur').value||3,minClipOn:$('gMinOn').checked};}
+function writeCfg(){$('bpm').value=state.bpm!=null?state.bpm:'';$('projectName').value=state.projectName;
+$('notepad').value=state.notepad;$('universalPrompt').value=state.universalPrompt;$('upTitle').value=state.universalPromptTitle||'';
+$('techFps').value=state.techConfig.fps;$('techCfg').value=state.techConfig.cfgScale;$('techSteps').value=state.techConfig.steps;
+$('cfgChk').checked=state.techConfig.includeCfg;$('stepsChk').checked=state.techConfig.includeSteps;
+const rs=$('techRes');if([...rs.options].some(o=>o.value===state.techConfig.res))rs.value=state.techConfig.res;
+$('customResField').style.display=state.techConfig.res==='custom'?'':'none';
+$('customW').value=state.techConfig.customW||1920;$('customH').value=state.techConfig.customH||1080;
+$('gTargetDur').value=state.globalConfig.targetDuration;$('gOverlapSec').value=state.globalConfig.overlapSec;
+$('gSnap').checked=state.globalConfig.snapToBeat;$('gSnapTh').value=state.globalConfig.snapThreshold;
+$('gFLF').checked=state.globalConfig.firstLastFrame;$('gMinDur').value=state.globalConfig.minClipDur;
+$('gMinOn').checked=state.globalConfig.minClipOn;
+if(state.totalDurationMs){$('totalDuration').value=msToTime(state.totalDurationMs);$('tlTotalTime').textContent=msToTime(state.totalDurationMs);}
+syncTcards();updInfo();}
+const applyUpdate=()=>{readCfg();genClips();};
+
+/* ################################################################################
+   #  24 · ESTADO, DASHBOARDS Y AVISOS                                            #
+   ################################################################################ */
+function coverage(){const td=state.totalDurationMs;if(!td)return 0;
+const iv=[...state.sections].map(s=>[s.startMs,s.endMs]).sort((a,b)=>a[0]-b[0]);
+let tot=0,cs=null,ce=null;
+iv.forEach(([s,e])=>{if(cs==null){cs=s;ce=e;}else if(s<=ce){ce=Math.max(ce,e);}else{tot+=ce-cs;cs=s;ce=e;}});
+if(cs!=null)tot+=ce-cs;return Math.min(100,Math.round(tot/td*100));}
+function validate(){const w=[];
+if(!state.events.length)w.push(t('warn.noCsv'));
+if(!audioBuffer&&!state.totalDurationMs)w.push(t('warn.noAudio'));
+if(state.bpm==null)w.push(t('warn.noBpm'));
+if(state.clips.some(c=>c.genDurMs>20000))w.push(t('warn.long'));
+if(state.clips.some(c=>c.genDurMs>(c.D||0)+1))w.push(t('warn.over'));
+$('warnings').innerHTML=w.map(m=>'<div class="warn">'+m+'</div>').join('');}
+function renderStatus(){const tf=state.clips.reduce((a,c)=>a+c.frames,0);
+$('statusBar').innerHTML='<span class="si">🎵 <span class="sv">'+(state.audioFileName||'—')+'</span> '+msToTime(state.totalDurationMs)+'</span>'+
+'<span class="si">BPM <span class="sv">'+(state.bpm||'—')+'</span></span>'+
+'<span class="si">'+t('st.cover')+' <span class="sv">'+coverage()+'%</span></span>'+
+'<span class="si">📑 <span class="sv">'+state.sections.length+'</span> 🎬 <span class="sv">'+state.scenes.length+'</span> 🎞 <span class="sv">'+state.clips.length+'</span></span>'+
+'<span class="si sw">'+($('warnings').children.length?'⚠ '+$('warnings').children.length+' '+t('st.warn'):'')+'</span>';
+$('dashSections').innerHTML='<span>'+t('dash.sections')+': <b>'+state.sections.length+'</b></span><span>'+t('dash.scenes')+': <b>'+state.assignments.length+'</b></span><span>'+t('dash.clips')+': <b>'+state.clips.length+'</b></span><span>'+t('dash.frames')+': <b>'+tf+'</b></span><span>'+t('dash.cover')+': <b>'+coverage()+'%</b></span>';
+$('dashScenes').innerHTML='<span>'+t('dash.scenes')+': <b>'+state.scenes.length+'</b></span><span>'+t('dash.assign')+': <b>'+state.assignments.length+'</b></span><span>'+t('dash.reuse')+': <b>'+state.assignments.filter(a=>state.assignments.filter(b=>b.sceneId===a.sceneId).length>1).length+'</b></span>';
+$('dashExport').innerHTML='<span>'+t('dash.clips')+': <b>'+state.clips.length+'</b></span><span>'+t('dash.frames')+': <b>'+tf+'</b></span><span>'+t('dash.cover')+': <b>'+coverage()+'%</b></span>';}
+function updInfo(){$('csvInfo').textContent=(state.events.length?'✅ '+state.events.length+' beats':'— CSV')+' · '+(audioBuffer?'✅ '+msToTime(state.totalDurationMs):'— audio')+(state.audioFileName?' · 🎵 '+state.audioFileName:'');}
+function renderAll(){validate();renderStatus();renderSections();renderSceneLib();renderAssignments();updateAssignSel();
+renderCD();renderAesthetics();renderBA();renderRail();drawTL();drawPH(curMs());updSB();updInfo();}
+
+/* ################################################################################
+   #  25 · EXPORTACIÓN                                                            #
+   ################################################################################ */
+function buildReport(){readCfg();const tf=state.clips.reduce((a,c)=>a+c.frames,0);const A=[];
+A.push('╔══════════════════════════════════════════════════════╗');
+A.push('║  📋 PRODUCTION REPORT — Beat Calculator for AI Video ║');
+A.push('║  By Seny Clever · v1                                 ║');
+A.push('╚══════════════════════════════════════════════════════╝');A.push('');
+A.push('Project: '+state.projectName);A.push('Generated: '+new Date().toLocaleString());A.push('');
+A.push('═══ GLOBAL CONTEXT ═══════════════════════════════════');
+A.push('BPM: '+(state.bpm||'N/A'));A.push('Total: '+(state.totalDurationMs?msToTime(state.totalDurationMs):'N/A'));
+A.push('Resolution: '+getResStr()+' @ '+state.techConfig.fps+'fps');
+const pp=[];if(state.techConfig.includeCfg)pp.push('CFG '+state.techConfig.cfgScale);
+if(state.techConfig.includeSteps)pp.push('Steps '+state.techConfig.steps);if(pp.length)A.push(pp.join(' | '));
+A.push('Target: '+state.globalConfig.targetDuration+'s | Overlap: '+state.globalConfig.overlapSec+'s | Coverage: '+coverage()+'%');
+if(state.notepad.trim()){A.push('');A.push('📝 Notes:');A.push(state.notepad.trim());}
+A.push('');A.push('═══ UNIVERSAL PROMPT ═════════════════════════════════');
+if(state.universalPromptTitle)A.push(state.universalPromptTitle);
+A.push('');A.push(state.universalPrompt.trim()||'[none]');
+A.push('');A.push('═══ AESTHETICS ═══════════════════════════════════════');
+if(state.aesthetics.length)state.aesthetics.forEach(a=>{A.push('');A.push('🎨 ['+a.name+']');A.push(a.content);});else A.push('[none]');
+A.push('');A.push('═══ SECTIONS / SCENES / CLIPS ═════════════════════════');
+state.sections.forEach((sec,si)=>{A.push('');A.push('── SECTION: '+sec.name);
+A.push('  Time: '+msToTime(sec.startMs)+' → '+msToTime(sec.endMs));
+if(sec.description)A.push('  📝 '+sec.description);
+const sc=state.clips.filter(c=>c.sectionIdx===si);A.push('  Clips: '+sc.length);
+sc.forEach(c=>{const scn=sceneById(c.sceneId);A.push('');
+A.push('  ── CLIP '+String(c.id).padStart(2,'0')+(c.manual?' (MANUAL)':'')+(scn?' ['+scn.name+']':' [direct]'));
+A.push('  Core: '+msToTime(c.coreStartMs)+'→'+msToTime(c.coreEndMs)+' ('+fmtDur(c.coreDurMs)+')');
+A.push('  Gen: '+msToTime(c.genStartMs)+'→'+msToTime(c.genEndMs)+' ('+c.frames+'f)');
+if(c.firstFrameFrom)A.push('  First: last frame CLIP '+String(c.firstFrameFrom).padStart(2,'0'));
+const d=state.clipDescriptions[c.id];if(d&&d.trim()){A.push('  📝 SCRIPT:');d.trim().split('\n').forEach(l=>A.push('    '+l));}
+const av=aestOfClip(c);if(av>=0)A.push('  🎨 AESTHETIC: '+state.aesthetics[av].name);
+const p2=[getResStr()+' | '+state.techConfig.fps+'fps | '+c.frames+'f'];
+if(state.techConfig.includeCfg)p2.push('CFG '+state.techConfig.cfgScale);
+if(state.techConfig.includeSteps)p2.push('Steps '+state.techConfig.steps);
+A.push('  ⚙️ '+p2.join(' | '));});});
+A.push('');A.push('═══ SUMMARY ══════════════════════════════════════════');
+A.push('Clips: '+state.clips.length+' | Frames: '+tf+' | Coverage: '+coverage()+'%');
+return A.join('\n');}
+const downloadTXT=()=>{dl(sn(state.projectName)+'.txt',buildReport());toast(t('toast.report'));};
+const copyTXT=()=>cp(buildReport());
+function buildMarkers(){const f=$('markerFormat').value;
+if(f==='youtube'){const A=['# Beat Calculator for AI Video · v1','# '+state.projectName,''];
+state.sections.forEach(s=>A.push(msToTime(s.startMs).slice(0,5)+' '+s.name.toUpperCase()));return A.join('\n');}
+const mk=[];state.clips.forEach(c=>{mk.push({t:c.startMs,l:'CLIP_'+String(c.id).padStart(2,'0')+'_in'});mk.push({t:c.endMs,l:'CLIP_'+String(c.id).padStart(2,'0')+'_out'});});
+state.events.forEach(e=>mk.push({t:e.timeMs,l:'beat_'+e.index}));mk.sort((a,b)=>a.t-b.t);
+const fps=state.techConfig.fps||24;
+const tc=ms=>{const f2=Math.round(ms/1000*fps);return String(Math.floor(f2/fps/3600)).padStart(2,'0')+':'+String(Math.floor(f2/fps/60)%60).padStart(2,'0')+':'+String(Math.floor(f2/fps)%60).padStart(2,'0')+':'+String(f2%fps).padStart(2,'0');};
+if(f==='universal')return['# universal','# '+state.projectName,'',...mk.map(m=>(m.t/1000).toFixed(3)+'\t'+m.l)].join('\n');
+if(f==='resolve')return['Frame,Name,Color',...mk.map(m=>tc(m.t)+','+m.l+',Red')].join('\n');
+if(f==='blender')return['import bpy','','scene=bpy.context.scene','scene.render.fps='+fps,'','m=[',...mk.map(m=>'    ('+(m.t/1000).toFixed(3)+',"'+m.l+'"),'),']','','for t2,n in m:','    scene.timeline_markers.new(n,frame=int(t2*scene.render.fps))'].join('\n');
+if(f==='premiere')return['Timecode,Name',...mk.map(m=>tc(m.t)+','+m.l)].join('\n');
+if(f==='capcut')return['# CapCut','',...mk.map(m=>msToTime(m.t)+'  →  '+m.l)].join('\n');
+return['# NLE','',...mk.map(m=>(m.t/1000).toFixed(3)+'\t'+m.l)].join('\n');}
+function downloadMarkers(){const f=$('markerFormat').value;dl(sn(state.projectName)+'_'+f+'_markers.'+(f==='blender'?'py':'txt'),buildMarkers());toast(t('toast.mark'));}
+const copyMarkers=()=>cp(buildMarkers());
+const buildJSON=()=>{readCfg();return JSON.stringify({version:'1.0',state},null,2);};
+const saveJSON=()=>{dl(sn(state.projectName)+'.json',buildJSON());toast(t('toast.jsonS'));};
+function loadJSON(tx){try{const d=JSON.parse(tx);if(!d.state)return;const s=d.state;
+s.scenes=s.scenes||[];s.assignments=s.assignments||[];s.universalPromptTitle=s.universalPromptTitle||'';
+s.audioFileName=s.audioFileName||'';s.techConfig=s.techConfig||{};
+s.techConfig.includeCfg=!!s.techConfig.includeCfg;s.techConfig.includeSteps=!!s.techConfig.includeSteps;
+s.techConfig.customW=s.techConfig.customW||1920;s.techConfig.customH=s.techConfig.customH||1080;
+s.globalConfig=s.globalConfig||{};s.globalConfig.snapToBeat=!!s.globalConfig.snapToBeat;
+s.globalConfig.snapThreshold=s.globalConfig.snapThreshold||500;s.globalConfig.overlapSec=s.globalConfig.overlapSec||0;
+s.globalConfig.minClipDur=s.globalConfig.minClipDur||3;s.globalConfig.minClipOn=!!s.globalConfig.minClipOn;
+(s.sections||[]).forEach(x=>{if(x.aestheticIdx===undefined)x.aestheticIdx=null;});
+(s.scenes||[]).forEach(x=>{x.config=x.config||{};if(x.config.crossFLF===undefined)x.config.crossFLF=false;});
+(s.clips||[]).forEach(c=>{c.D=c.D||((s.globalConfig.targetDuration||10)*1000);c.S=c.S||0;c.manual=!!c.manual;
+if(c.asnIdx===undefined)c.asnIdx=null;
+if(c.coreStartMs===undefined){c.coreStartMs=c.startMs+c.S/2;c.coreEndMs=c.endMs-c.S/2;c.coreDurMs=(c.endMs-c.startMs)-c.S;}});
+state=s;undoStack=[];redoStack=[];writeCfg();renderAll();toast(t('toast.jsonL'));
+if(state.audioFileName)setTimeout(()=>toast(t('toast.audioR')+' "'+state.audioFileName+'". '+t('toast.loadM'),'warn'),500);
+}catch(e){toast('⚠','err');}}
+
+/* ################################################################################
+   #  26 · MANUAL COMPLETO BILINGÜE                                               #
+   ################################################################################ */
+function buildGuide(){
+if(LANG==='es')return `╔══════════════════════════════════════════════════════════════╗
+║   📖 MANUAL COMPLETO · Beat Calculator for AI Video          ║
+║   ✍️  By Seny Clever · versión 1                              ║
+║   🧠 Planifica videos musicales para IA de video             ║
+╚══════════════════════════════════════════════════════════════╝
+
+🧭 ÍNDICE
+  01 · ¿Qué es y para qué sirve?
+  02 · Requisitos e instalación
+  03 · Tour por la interfaz
+  04 · Flujo de trabajo recomendado en 7 pasos
+  05 · Pestaña ⚙️ Configuración
+  06 · Pestaña 🎵 Línea de Tiempo (el corazón de la herramienta)
+  07 · Pestaña 📑 Secciones
+  08 · Pestaña 🎬 Escenas
+  09 · Pestaña 📝 Descripción de Clips
+  10 · Pestaña 🎨 Creativo
+  11 · Pestaña 📊 Análisis de Beats
+  12 · Pestaña 📤 Exportar
+  13 · El selector de tiempo ⏱️ y la tecla Enter
+  14 · Idioma 🌐 y notificaciones 🔔
+  15 · Atajos de teclado ⌨️
+  16 · Solución de problemas 🧰
+  17 · Glosario 📚
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 01 · ¿QUÉ ES Y PARA QUÉ SIRVE?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Es un planificador de producción para videos musicales generados
+con IA (FramePack, Wan, Kling, Runway, etc.).
+🎯 Su trabajo: escuchar tu canción, dividirla en SECCIONES
+   musicales, organizarlas en ESCENAS visuales y calcular los
+   CLIPS exactos que debes generar con tu IA de video.
+📄 Su producto: un informe de producción listo para entregarle
+   a cualquier IA como dirección cinematográfica completa.
+🔒 Privacidad: todo ocurre en tu navegador. Sin servidores,
+   sin subidas, sin cuentas. Tu música no sale de tu PC.
+🧩 JERARQUÍA FUNDAMENTAL (recuérdala siempre):
+   CANCIÓN ➜ SECCIÓN (música) ➜ ESCENA (visual) ➜ CLIP (video IA)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧰 02 · REQUISITOS E INSTALACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Navegador moderno: Chrome, Edge, Firefox o Brave.
+✅ Sonic Visualiser (gratis) para detectar los beats:
+   🔗 https://www.sonicvisualiser.org
+✅ Cualquier IA de video (local u online) para generar clips.
+✅ Instalación: ninguna. Guarda el archivo .html y ábrelo.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🖥️ 03 · TOUR POR LA INTERFAZ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔝 BARRA SUPERIOR: 🌐 idioma · 🔔 historial de avisos ·
+   🔄 Actualizar · ＋ Nueva · 💾 Guardar JSON · 📂 Cargar JSON.
+📊 BARRA DE ESTADO: 🎵 audio y duración · BPM · 🎯 cobertura %
+   (cuánto de la canción está cubierta por secciones) ·
+   conteos 📑 🎬 🎞 · ⚠ avisos activos.
+🗂️ PESTAÑAS (en orden de flujo): ⚙️ Configuración ➜ 🎵 Línea de
+   Tiempo ➜ 📑 Secciones ➜ 🎬 Escenas ➜ 📝 Descripción de Clips
+   ➜ 🎨 Creativo ➜ 📊 Análisis de Beats ➜ 📤 Exportar.
+❓ AYUDA: cada función tiene un icono ❓ con explicación al
+   pasar el cursor.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 04 · FLUJO DE TRABAJO RECOMENDADO (7 PASOS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1️⃣ ⚙️ Carga el audio y el CSV de beats. Escribe el BPM.
+2️⃣ ⚙️ Ajusta resolución, FPS y los defaults de clips.
+3️⃣ 🎵 Escucha y marca SECCIONES con M directamente al vuelo.
+4️⃣ 🎬 Crea ESCENAS y márcalas con S sobre la canción.
+5️⃣ 🎵 Pulsa 🎬 Generar (o 🔄 Actualizar) para obtener CLIPS.
+6️⃣ 📝 Escribe el guion visual de cada clip y asigna estéticas.
+7️⃣ 📤 Exporta el informe para tu IA y los marcadores para tu
+   editor de video.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚙️ 05 · PESTAÑA CONFIGURACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎧 CARGAR AUDIO: MP3, WAV, OGG o FLAC. La duración total se
+   detecta sola y el nombre del archivo queda en el JSON.
+🥁 IMPORTAR CSV: desde Sonic Visualiser:
+   1️⃣ File / Open... (Ctrl+O)
+   2️⃣ Transform / Analysis by Category / Time / Tempo /
+      Bar and Beat Tracker: Bars... (Ctrl+T)
+   3️⃣ File / Export Annotation Layer... (Ctrl+Y)
+🔢 BPM: escríbelo a mano. Se usa para cálculos de ritmo.
+🖥️ TÉCNICA: resolución (todos los estándares de IA de video,
+   incluidas 1:1 y 9:16, más una personalizada) y FPS libre.
+   ☑ CFG y ☑ Steps son CASILLAS: si tu IA no usa esos
+   parámetros, desmárcalos y desaparecen del informe y prompts.
+✂️ DEFAULTS DE CLIPS (heredables por escena):
+   🅰️ DURACIÓN
+      • Duración objetivo = TECHO DURO: ningún clip la excede
+        jamás (es lo máximo que tu IA puede generar).
+      • Solapamiento (segundos) = margen para transiciones.
+        Se RESTA del objetivo. 0 = apagado.
+   🅱️ RITMO Y MÍNIMOS
+      • Ajustar al beat: imanta el fin del clip al beat anterior
+        más cercano. Solo acorta, nunca alarga.
+      • Umbral (ms): distancia máxima para esa imantación.
+      • Duración mínima: piso deseado por clip. Es BLANDO: si
+        choca con el techo, gana el techo y se te avisa.
+   🅲 CONTINUIDAD
+      • First-Last-Frame (FLF): el último frame de un clip se
+        usa como imagen inicial del siguiente.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎵 06 · LÍNEA DE TIEMPO (EL CORAZÓN)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📐 BANDAS INDEPENDIENTES (arriba a abajo): 📑 Secciones ·
+   🎬 Escenas · 🎞 Clips automáticos · ✍ Clips manuales ·
+   🌊 forma de onda · 🥁 beats del CSV · 📏 regleta
+   (milisegundos pequeños, segundos medianos, mayores
+   etiquetadas). Cada banda responde solo a sus propias barras:
+   nunca confundirás jerarquías al arrastrar, y los clips que
+   marques a mano nunca se superponen con los generados.
+✍️ MARCAR AL VUELO: 📑 M = sección · 🎬 S = escena · 🎞 C = clip
+   manual. Primera pulsación = inicio · segunda = fin.
+   Al cerrar la marca se abre un modal que pide NOMBRE,
+   DESCRIPCIÓN y ESTÉTICA (la estética se aplica a esa barra:
+   sección, escena o clip). Enter guarda, Esc cancela.
+   Las escenas y clips marcados se AUTO-VINCULAN a la sección
+   (y escena) que los contiene. Si una escena cruza el límite
+   de una sección, se crean 2 asignaciones y se te avisa.
+🖱️ RATÓN: clic = saltar · clic y arrastrar = scrub (con etiqueta
+   de tiempo legible junto a la aguja) · arrastrar cuerpo =
+   mover · arrastrar borde = redimensionar · doble clic en
+   barra = ir a su pestaña de configuración con pulso de 3s ·
+   rueda = zoom rápido centrado en el cursor.
+🧲 🥁 🔒 PRECISIÓN: 🧲 Bordes imanta a límites de secciones,
+   escenas y clips · 🥁 Beats imanta a los golpes del CSV ·
+   🔒 Límite D impide redimensionar escenas/clips más allá de
+   la duración objetivo. ⚠ rayado rojo = barra excedida.
+   "→ N clips" sobre una escena = en cuántos clips se dividirá.
+↩️ ↪️ DESHACER / REHACER: Ctrl+Z y Ctrl+Y (50 pasos).
+🎛️ RAIL INFERIOR: listas de Secciones, Escenas, Clips
+   automáticos (agrupados por escena, con refugio "sin escena")
+   y Clips manuales (grupo propio). Cada elemento:
+   ▶ reproducir · ⚙ configurar · 🎨 estética. Cabeceras con
+   estado: ⚠ excedidos · ✍ sin guion · 🎨 sin estética.
+   Botones ▸▸/◂◂ expanden o colapsan todo.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📑 07 · SECCIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎼 Partes musicales: Intro, Verso, Coro, Puente...
+✍️ Se crean por tiempo (selector ⏱️) o por números de beat.
+🔁 El campo "Desde" se autocompleta con el "Hasta" anterior.
+✎️ Editables (nombre y descripción) sin borrarlas.
+🔢 Cada tarjeta muestra cuántas escenas y clips contiene.
+⌨️ Enter guarda el formulario de creación y el de edición.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 08 · ESCENAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏙️ Una escena es una unidad visual: lugar, concepto, atmósfera.
+📚 BIBLIOTECA: tarjetas acordeón con metadatos (🎨 estética ·
+   ⏱ duración · ⇄ solapamiento · 🔗 FLF · usos) y descripción
+   con "ver más" para textos largos.
+⚙️ CADA ESCENA puede heredar defaults o personalizar: duración
+   de clip, solapamiento, FLF y 🔗 "continuidad entre
+   apariciones" (FLF cruzado), que encadena los clips cuando la
+   misma escena reaparece en otra sección.
+📎 ASIGNACIÓN: coloca la escena dentro de una sección con rango
+   de tiempo. Una escena puede reaparecer varias veces.
+   Sin escenas, los clips se generan directo por sección.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 09 · DESCRIPCIÓN DE CLIPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✍️ Guion visual por clip: qué se ve, cámara, luz, acción.
+🎨 Estética por clip con jerarquía: CLIP ➜ ESCENA ➜ SECCIÓN
+   (gana la más específica).
+📋 "Copiar prompt" arma el prompt completo: Prompt Universal +
+   Estética + Dirección de escena + Guion + Parámetros.
+✍ Los clips manuales se identifican con la marca "manual".
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎨 10 · CREATIVO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 PROMPT UNIVERSAL: base cinematográfica que se antepone a
+   todos los clips. Tiene título y se exporta/importa como
+   "Titulo - Prompt Universal.txt".
+📝 BLOC DE NOTAS: notas del director. El botón 🤖 Contexto para
+   IA inserta una leyenda extendida que enseña a cualquier IA a
+   leer tu informe: jerarquía, campos Core/Gen/First-frame,
+   jerarquía de estéticas y reglas de generación.
+🎨 ESTÉTICAS: biblioteca de estilos visuales reutilizables,
+   exportables e importables.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 11 · ANÁLISIS DE BEATS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔍 Tabla completa de golpes con tiempo e intervalo.
+📈 Regularidad: qué tan constante es tu groove (100% = metrónomo).
+⬇️ Exportar CSV: recupera tus beats como Proyecto_beats.csv
+   sin necesitar el CSV original.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📤 12 · EXPORTAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📄 INFORME .txt: documento limpio y jerárquico para entregar a
+   cualquier IA como dirección de producción completa.
+🧾 PROYECTO .json: guarda y restaura TODO (incluido el nombre
+   del audio, que se te pedirá recargar al abrir en otra PC).
+🎞️ MARCADORES: Universal, 📺 YouTube (solo inicios de sección,
+   listo para la descripción del video), DaVinci Resolve,
+   Blender (script Python), Premiere, CapCut y NLE genérico.
+   Se descargan como Proyecto_<formato>_markers.
+📖 MANUAL: este documento.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⏱️ 13 · SELECTOR DE TIEMPO Y TECLA ENTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Formato universal: mm:ss:fff (minutos:segundos:milisegundos).
+🖱️ Flechas: clic = paso · MANTENER presionado = repetición
+   acelerada · doble clic sobre el número = teclear directo ·
+   rueda del ratón y teclas ↑/↓ también funcionan.
+⌨️ ENTER guarda en: modal de nueva barra (M/S/C), selector de
+   tiempo, creación de sección, edición de sección, editor de
+   escena, editor de estética y asignación de escena.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌐 14 · IDIOMA Y NOTIFICACIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌐 El botón del header alterna Español/English en toda la
+   interfaz, informes, marcadores y manual. Se recuerda solo.
+🔔 El panel guarda las últimas 50 notificaciones con hora,
+   por si te perdiste alguna.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⌨️ 15 · ATAJOS DE TECLADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Espacio ▶️ play/pausa · M 📑 sección · S 🎬 escena · C ✍ clip manual
+Ctrl+Z ↩️ deshacer · Ctrl+Y ↪️ rehacer · Enter 💾 guardar · Esc ✕
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧰 16 · SOLUCIÓN DE PROBLEMAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔇 El audio no suena al primer clic: normal, el navegador exige
+   una interacción previa. Haz clic en la página y reintenta.
+📄 El CSV no carga: verifica que cada línea sea tiempo,numero.
+🕳️ Huecos en la cobertura: revisa el % de la barra de estado y
+   completa las secciones faltantes.
+⚠️ Clips rayados en rojo: exceden el objetivo; activa 🔒 o
+   regenera con otra duración objetivo.
+✍ Mis clips manuales no aparecen con los automáticos: es
+   correcto, viven en su propia banda y grupo del rail.
+💾 Cambié de PC: carga el JSON y luego recarga el audio cuando
+   la herramienta te lo pida.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 17 · GLOSARIO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🥁 Beat: golpe rítmico detectado · BPM: golpes por minuto
+🎞 Clip: segmento de video IA · ✍ Clip manual: marcado a mano
+🎯 Core: duración usable en edición · 🎬 Gen: duración generada
+🏙️ Escena: unidad visual · ⇄ Solapamiento: margen de transición
+🔗 FLF: continuidad de frames · 🧲 Snap: imantación
+🖱️ Scrub: arrastrar la aguja · 🎯 Cobertura: % cubierto
+
+╔══════════════════════════════════════════════════════════════╗
+║  Hecho con ❤️ para creadores · Beat Calculator for AI Video  ║
+║  By Seny Clever · v1 · Herramienta local y libre             ║
+╚══════════════════════════════════════════════════════════════╝`;
+return `╔══════════════════════════════════════════════════════════════╗
+║   📖 COMPLETE MANUAL · Beat Calculator for AI Video          ║
+║   ✍️  By Seny Clever · version 1                              ║
+║   🧠 Plan music videos for AI video generation               ║
+╚══════════════════════════════════════════════════════════════╝
+
+🧭 CONTENTS
+  01 What it is · 02 Requirements · 03 Interface tour ·
+  04 Recommended workflow · 05 Settings · 06 Timeline ·
+  07 Sections · 08 Scenes · 09 Clip Descriptions ·
+  10 Creative · 11 Beat Analysis · 12 Export · 13 Time picker
+  & Enter key · 14 Language & notifications · 15 Shortcuts ·
+  16 Troubleshooting · 17 Glossary
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧠 01 · WHAT IT IS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+A production planner for music videos made with AI video tools
+(FramePack, Wan, Kling, Runway...). It listens to your song,
+splits it into musical SECTIONS, organizes them into visual
+SCENES and computes the exact CLIPS your AI must generate.
+Its deliverable: a production report ready to hand to any AI
+as complete cinematic direction. Fully local: no servers,
+no uploads. Core hierarchy: SONG ➜ SECTION ➜ SCENE ➜ CLIP.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧰 02 · REQUIREMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Modern browser (Chrome, Edge, Firefox, Brave).
+✅ Sonic Visualiser (free) for beat detection.
+✅ Any AI video tool (local or online).
+✅ No install: save the .html file and open it.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🖥️ 03 · INTERFACE TOUR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔝 Header: 🌐 language · 🔔 notification history · 🔄 Update ·
+   ＋ New · 💾 Save JSON · 📂 Load JSON.
+📊 Status bar: 🎵 audio & duration · BPM · 🎯 coverage % ·
+   counts 📑 🎬 🎞 · ⚠ active warnings.
+🗂️ Tabs in workflow order: Settings ➜ Timeline ➜ Sections ➜
+   Scenes ➜ Clip Descriptions ➜ Creative ➜ Beat Analysis ➜ Export.
+❓ Every feature has a hover help icon.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🚀 04 · RECOMMENDED WORKFLOW (7 STEPS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1️⃣ Load audio + beats CSV, type the BPM.
+2️⃣ Set resolution, FPS and clip defaults.
+3️⃣ Mark SECTIONS live with M while listening.
+4️⃣ Create SCENES and mark them with S over the song.
+5️⃣ Generate CLIPS (🎬 Generate or 🔄 Update).
+6️⃣ Write each clip script and assign aesthetics.
+7️⃣ Export the report for your AI and markers for your editor.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚙️ 05 · SETTINGS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎧 Audio: MP3/WAV/OGG/FLAC. Duration auto-detected; filename is
+   remembered inside the JSON.
+🥁 CSV from Sonic Visualiser: File/Open (Ctrl+O) ➜ Transform /
+   Analysis by Category / Time / Tempo / Bar and Beat Tracker:
+   Bars... (Ctrl+T) ➜ File / Export Annotation Layer (Ctrl+Y).
+🖥️ Technical: every AI-video resolution (16:9, 1:1, 9:16) plus
+   custom; free FPS; CFG and Steps are CHECKBOXES: uncheck them
+   and they vanish from report and prompts.
+✂️ Clip defaults (inheritable by scenes):
+   🅰️ Target duration = HARD CEILING, never exceeded.
+      Overlap (seconds) = transition margin, subtracted from
+      target. 0 = off.
+   🅱️ Beat snap: clip end magnets to the nearest PREVIOUS beat
+      (only shortens). Threshold in ms. Soft minimum duration:
+      ceiling always wins on conflict.
+   🅲 First-Last-Frame: last frame of a clip seeds the next one.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎵 06 · TIMELINE (THE HEART)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📐 Independent bands: Sections · Scenes · Auto clips · Manual
+   clips · waveform · CSV beats · ruler (small ms, medium s,
+   labeled majors). Each band only answers to its own bars, and
+   hand-marked clips never overlap generated ones.
+✍️ Live marking: M section · S scene · C manual clip. First
+   press = start, second = end. Closing the mark opens a modal
+   asking NAME, DESCRIPTION and AESTHETIC (applied to that bar:
+   section, scene or clip). Enter saves, Esc cancels.
+   Scenes and clips AUTO-LINK to their containing section/scene.
+   A scene crossing a section border creates 2 assignments with
+   a warning.
+🖱️ Mouse: click = seek · drag = scrub (with a readable time
+   label next to the needle) · drag body = move · drag edge =
+   resize · double-click bar = jump to its config tab with a 3s
+   pulse · wheel = fast zoom at cursor.
+🧲 Edges snap · 🥁 Beats snap · 🔒 Limit D clamps resizing to
+   the target. ⚠ red hatch = bar exceeds target.
+   "→ N clips" over a scene = how many clips it splits into.
+↩️↪️ Undo/Redo: Ctrl+Z / Ctrl+Y (50 steps).
+🎛️ Bottom rail: Sections, Scenes, Auto clips (grouped by scene,
+   with a "no scene" refuge) and Manual clips (own group).
+   Each item: ▶ play · ⚙ configure · 🎨 aesthetic. Group headers
+   show ⚠ over · ✍ no script · 🎨 no aesthetic. ▸▸/◂◂ expand or
+   collapse all.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📑 07 · SECTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Musical parts (Intro, Verse, Chorus...). Created by time (⏱️
+picker) or beat numbers. "From" auto-fills from previous "To".
+Editable (✎) without deleting. Each card shows scene and clip
+counts. Enter saves both the create and edit forms.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 08 · SCENES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+A scene is a visual unit: place, concept, mood. The library
+shows accordion cards with metadata (🎨 ⏱ ⇄ 🔗 uses) and a
+"see more" for long descriptions. Each scene can inherit
+defaults or override duration, overlap, FLF and cross-
+appearance continuity (chains FLF when the scene reappears in
+another section). Assign scenes to sections with time ranges;
+the same scene can reappear. Without scenes, clips generate
+directly per section.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 09 · CLIP DESCRIPTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Per-clip visual script. Aesthetic per clip with hierarchy
+CLIP ➜ SCENE ➜ SECTION. "Copy prompt" assembles Universal
+Prompt + Aesthetic + Scene direction + Script + Parameters.
+Manual clips are tagged "manual".
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎨 10 · CREATIVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Universal Prompt with its own title, exportable as
+"Title - Prompt Universal.txt". Notepad with 🤖 AI Context
+button: inserts an extended legend teaching any AI to read your
+report (hierarchy, Core/Gen/First-frame fields, aesthetic
+hierarchy, generation rules). Aesthetics library with
+export/import.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 11 · BEAT ANALYSIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Full beat table with intervals, regularity %, and Export CSV
+(Project_beats.csv) to recover beats from a saved JSON.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📤 12 · EXPORT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📄 Report .txt for AIs · 🧾 Project .json (remembers audio
+filename) · 🎞 Markers: Universal, YouTube (section starts
+only), DaVinci Resolve, Blender (Python script), Premiere,
+CapCut, generic NLE — saved as Project_<format>_markers ·
+📖 this Manual.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⏱️ 13 · TIME PICKER & ENTER KEY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Format mm:ss:fff. Hold arrows = accelerated repeat; double-
+click the number = type it; wheel and ↑/↓ also work.
+⌨️ ENTER saves in: new-bar modal (M/S/C), time picker, section
+create, section edit, scene editor, aesthetic editor and scene
+assignment.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌐 14 · LANGUAGE & NOTIFICATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🌐 toggles ES/EN everywhere (UI, report, markers, manual) and
+is remembered. 🔔 keeps the last 50 notifications with time.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⌨️ 15 · SHORTCUTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Space play · M section · S scene · C manual clip ·
+Ctrl+Z undo · Ctrl+Y redo · Enter save · Esc cancel
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🧰 16 · TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔇 No sound on first click: browsers require one interaction.
+📄 CSV fails: each line must be time,number. 🕳️ Coverage gaps:
+check the % on the status bar. ⚠ Red-hatched clips: enable 🔒
+or regenerate. ✍ Manual clips not mixed with auto ones: correct,
+they live in their own band and rail group. 💾 New PC: load
+JSON, then reload audio on ask.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📚 17 · GLOSSARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🥁 Beat · BPM · 🎞 Clip · ✍ Manual clip · 🎯 Core (editable
+duration) · 🎬 Gen (generated duration) · 🏙️ Scene ·
+⇄ Overlap · 🔗 FLF · 🧲 Snap · 🖱️ Scrub · 🎯 Coverage.
+
+╔══════════════════════════════════════════════════════════════╗
+║  Made with ❤️ for creators · Beat Calculator for AI Video    ║
+║  By Seny Clever · v1 · Local & free tool                     ║
+╚══════════════════════════════════════════════════════════════╝`;}
+const downloadGuide=()=>{dl('Beat_Calculator_Manual.txt',buildGuide());toast(t('toast.guide'));};
+
+/* ################################################################################
+   #  27 · SESIÓN                                                                 #
+   ################################################################################ */
+function newSession(){if(!confirm(L('¿Nueva sesión?','New session?')))return;stopPB();
+state={projectName:'Proyecto',bpm:null,events:[],sections:[],scenes:[],assignments:[],clips:[],
+clipDescriptions:{},clipAesthetics:{},notepad:'',universalPrompt:'',universalPromptTitle:'',aesthetics:[],
+techConfig:{res:'1920x1080',fps:24,cfgScale:6,steps:25,includeCfg:false,includeSteps:false,customW:1920,customH:1080},
+globalConfig:{targetDuration:10,overlapSec:0,snapToBeat:false,snapThreshold:500,firstLastFrame:false,minClipDur:3,minClipOn:false},
+totalDurationMs:null,audioFileName:''};
+undoStack=[];redoStack=[];railOpen={};hoverA=null;zoom=1;scrollMs=0;pendingMark=null;
+snapE=snapB=lockD=false;$('btnSnapE').classList.remove('active-toggle');
+$('btnSnapB').classList.remove('active-toggle');$('btnLock').classList.remove('active-toggle');
+markState={sec:'idle',scn:'idle',clip:'idle'};audioBuffer=null;killNode();
+writeCfg();$('totalDuration').value='';$('tlTotalTime').textContent='00:00:000';renderAll();}
+
+/* ################################################################################
+   #  28 · IMPORTS VARIOS                                                         #
+   ################################################################################ */
+function rfi(inp,cb){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>cb(e.target.result);r.readAsText(f);inp.value='';}
+function impAes(tx){const m1=tx.match(/NAME=(.*)/),m2=tx.match(/===CONTENT===\n([\s\S]*?)\n===END===/);
+if(!m1||!m2){toast('⚠','err');return;}state.aesthetics.push({name:m1[1].trim(),content:m2[1]});renderAll();toast(t('toast.aesI'));}
+function parseCSV(tx){const ev=[];tx.split(/\r?\n/).forEach(l=>{l=l.trim();if(!l)return;
+const p=l.split(/[,\t;]/);if(p.length>=2){const v=parseFloat(p[0].replace(/,/g,'.'));if(!isNaN(v))ev.push({timeMs:Math.round(v*1000),index:ev.length+1});}});
+ev.sort((a,b)=>a.timeMs-b.timeMs);ev.forEach((e,i)=>e.index=i+1);return ev;}
+
+/* ################################################################################
+   #  29 · TECLADO: atajos + ENTER guardador / KEYBOARD: shortcuts + saving Enter #
+   ################################################################################ */
+function initKB(){document.addEventListener('keydown',e=>{
+/* ES: Enter guarda según el contexto activo. EN: Enter saves per active context. */
+if(e.key==='Enter'){
+ if($('markModal').classList.contains('show')){e.preventDefault();markSave();return;}
+ if($('timePickerModal').classList.contains('show')){e.preventDefault();tpAccept();return;}
+ const el=e.target;
+ if(el.tagName==='INPUT'){
+  if(el.closest('#sceneEditorPanel')){e.preventDefault();saveSceneEdit();return;}
+  if(el.closest('#aestheticEditor')){e.preventDefault();saveAestheticEdit();return;}
+  const m=el.id.match(/^editSec(Name|Desc)(\d+)$/);
+  if(m){e.preventDefault();saveEditSec(+m[2]);return;}
+  if(el.closest('#tab-sections')){e.preventDefault();addSection();return;}
+  if(el.closest('#tab-scenes')&&(el.id==='assignStart'||el.id==='assignEnd')){e.preventDefault();addAssignment();return;}
+ }
+ return;}
+if(e.key==='Escape'){
+ if($('markModal').classList.contains('show')){markCancel();return;}
+ if($('timePickerModal').classList.contains('show')){tpCancel();return;}
+ return;}
+if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+if(e.code==='Space'){e.preventDefault();togglePlay();}
+if(e.code==='KeyM'){e.preventDefault();handleMark('sec');}
+if(e.code==='KeyS'){e.preventDefault();handleMark('scn');}
+if(e.code==='KeyC'){e.preventDefault();handleMark('clip');}
+if(e.ctrlKey&&e.code==='KeyZ'){e.preventDefault();undoAction();}
+if(e.ctrlKey&&e.code==='KeyY'){e.preventDefault();redoAction();}});}
+
+/* ################################################################################
+   #  30 · PESTAÑAS Y EVENTOS                                                     #
+   ################################################################################ */
+function buildTabs(){const act=(document.querySelector('.tab.active')||{dataset:{tab:'config'}}).dataset.tab;
+const T=[['config','tab.config'],['timeline','tab.timeline'],['sections','tab.sections'],['scenes','tab.scenes'],['clipdesc','tab.clipdesc'],['creative','tab.creative'],['beats','tab.beats'],['export','tab.export']];
+$('tabsBar').innerHTML=T.map(x=>'<div class="tab'+(x[0]===act?' active':'')+'" data-tab="'+x[0]+'">'+t(x[1])+'</div>').join('');
+document.querySelectorAll('.tab').forEach(tb=>tb.addEventListener('click',()=>{activateTab(tb.dataset.tab);
+if(tb.dataset.tab==='beats')renderBA();if(tb.dataset.tab==='clipdesc')renderCD();
+if(tb.dataset.tab==='scenes'){renderSceneLib();renderAssignments();updateAssignSel();}
+if(tb.dataset.tab==='sections')renderSections();if(tb.dataset.tab==='export')renderStatus();}));}
+function initEv(){
+$('audioFile').addEventListener('change',e=>{if(e.target.files[0])loadAudio(e.target.files[0]);e.target.value='';});
+$('csvFile').addEventListener('change',e=>rfi(e.target,tx=>{state.events=parseCSV(tx);
+if(!state.totalDurationMs&&state.events.length)state.totalDurationMs=state.events[state.events.length-1].timeMs+1000;
+renderAll();toast('✅ '+state.events.length+' '+t('toast.csv'));}));
+$('importAestheticFile').addEventListener('change',e=>rfi(e.target,impAes));
+$('importUPFile').addEventListener('change',e=>rfi(e.target,importUP));
+$('loadJsonFile').addEventListener('change',e=>rfi(e.target,loadJSON));
+$('loadJsonFile2').addEventListener('change',e=>rfi(e.target,loadJSON));
+$('secMode').addEventListener('change',()=>{const isT=$('secMode').value==='time';
+$('secTimeF1').style.display=isT?'':'none';$('secTimeF2').style.display=isT?'':'none';
+$('secBeatF1').style.display=isT?'none':'';$('secBeatF2').style.display=isT?'none':'';});
+$('scnTargetMode').addEventListener('change',()=>{$('scnTargetField').style.display=$('scnTargetMode').value==='custom'?'':'none';});
+$('scnOvMode').addEventListener('change',()=>{$('scnOvField').style.display=$('scnOvMode').value==='custom'?'':'none';});
+document.querySelectorAll('.time-input').forEach(i=>i.addEventListener('click',()=>openTP(i)));
+$('timePickerModal').addEventListener('click',e=>{if(e.target===$('timePickerModal'))tpCancel();});
+$('markModal').addEventListener('click',e=>{if(e.target===$('markModal'))markCancel();});
+$('aesMenu').addEventListener('change',e=>{if(aesTarget)setAesthetic(aesTarget.type,aesTarget.ref,e.target.value);hideAesMenu();});
+document.addEventListener('mousedown',e=>{if(!e.target.closest('#aesMenu'))hideAesMenu();});
+addEventListener('resize',()=>{drawTL();drawPH(curMs());updSB();});
+initTL();initKB();initTooltips();initTP();}
+
+/* ################################################################################
+   #  31 · ARRANQUE                                                               #
+   ################################################################################ */
+function init(){
+try{initEv();}catch(e){console.error('initEv:',e);}
+try{writeCfg();}catch(e){console.warn('writeCfg:',e);}
+try{buildTabs();renderAll();}catch(e){console.error('render:',e);}
+try{applyLang();}catch(e){console.warn('applyLang:',e);}
+try{renderNotifs();}catch(e){}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+</script>
+</body>
+</html>
