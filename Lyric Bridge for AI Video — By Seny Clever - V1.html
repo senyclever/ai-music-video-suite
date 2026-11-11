@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a12">
+<title>Puente Lírico · Lyric Bridge for AI Video - By Seny Clever</title>
+<style>
+:root{--bg:#0a0a12;--panel:#12121f;--panel2:#181828;--border:#2a2a45;--cyan:#00e5ff;--magenta:#ff2e88;--green:#39ff8e;--amber:#ffb454;--txt:#d8d8e8;--dim:#8888a8;--danger:#ff4d5e;--mono:'Consolas','Courier New',monospace}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.5;padding-bottom:70px}
+.mono{font-family:var(--mono)}.dim{color:var(--dim)}
+header{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:linear-gradient(180deg,#0e0e1a,#0a0a12);position:sticky;top:0;z-index:60}
+.hdr-title h1{font-size:15px;color:var(--cyan);text-shadow:0 0 12px rgba(0,229,255,.35)}
+.hdr-title span{font-size:10px;color:var(--dim)}
+.hdr-btns{display:flex;gap:6px;flex-wrap:wrap}
+.booterr{display:none;background:rgba(255,77,94,.12);border:1px solid var(--danger);color:var(--danger);border-radius:8px;padding:10px 12px;margin:10px auto;max-width:860px;font-size:12px;white-space:pre-line}
+.booterr.show{display:block}
+.statusbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:7px 12px;margin:10px auto;max-width:860px;font-size:11px}
+.statusbar .sv{font-family:var(--mono);color:var(--cyan)}
+.wrap{max-width:860px;margin:0 auto;padding:10px 12px}
+.warnings{margin-bottom:8px}
+.warn{background:rgba(255,180,84,.08);border-left:3px solid var(--amber);padding:6px 10px;border-radius:0 6px 6px 0;margin-bottom:4px;font-size:12px;color:var(--amber)}
+.ok{background:rgba(57,255,142,.07);border-left:3px solid var(--green);padding:6px 10px;border-radius:0 6px 6px 0;margin-bottom:4px;font-size:12px;color:var(--green)}
+.tabs{display:flex;gap:3px;border-bottom:1px solid var(--border);margin-bottom:12px;overflow-x:auto}
+.tab{padding:11px 12px;cursor:pointer;color:var(--dim);border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;font-size:12px;white-space:nowrap;user-select:none}
+.tab.active{color:var(--cyan);background:var(--panel);border-color:var(--border)}
+.tabpane{display:none}.tabpane.active{display:block}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px}
+.panel h3{margin-bottom:10px;color:var(--cyan);font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:3px;min-width:96px;flex:1}
+.field label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px}
+input[type=text],input[type=number],select,textarea{background:var(--panel2);border:1px solid var(--border);color:var(--txt);padding:10px 9px;border-radius:6px;font-size:14px;font-family:inherit;width:100%}
+textarea{font-family:var(--mono);font-size:12px;resize:vertical;min-height:70px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--cyan)}
+button{background:var(--panel2);border:1px solid var(--border);color:var(--txt);padding:10px 12px;border-radius:6px;cursor:pointer;font-size:13px;font-family:inherit;min-height:40px;display:inline-flex;align-items:center;justify-content:center;line-height:1.15}
+button:active{border-color:var(--cyan);color:var(--cyan)}
+button.primary{background:rgba(0,229,255,.12);border-color:var(--cyan);color:var(--cyan)}
+button.small{padding:6px 9px;font-size:11px;min-height:32px}
+button.on{background:rgba(57,255,142,.15);border-color:var(--green);color:var(--green)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.hint{font-size:11px;color:var(--dim);margin-top:4px}
+.tcard{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;user-select:none;min-height:40px}
+.tcard.on{border-color:var(--green);background:rgba(57,255,142,.08);color:var(--green)}
+.edot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.tl-wrap{position:relative;width:100%;background:#0d0d18;border:1px solid var(--border);border-radius:8px;overflow:hidden;touch-action:pan-y;user-select:none;cursor:crosshair}
+.tl-wrap canvas{display:block;width:100%}
+.tl-sb{height:18px;background:var(--panel2);border:1px solid var(--border);border-radius:8px;margin-top:5px;position:relative;cursor:pointer}
+.tl-sb-thumb{height:100%;background:rgba(0,229,255,.35);border-radius:8px;min-width:24px;position:absolute;top:0;cursor:grab}
+.tl-zoom{display:flex;align-items:center;gap:6px;margin-top:6px}
+.tl-zoom input[type=range]{flex:1;height:6px;-webkit-appearance:none;appearance:none;background:var(--panel2);border-radius:3px}
+.tl-zoom input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--cyan);border:2px solid var(--bg)}
+.line-card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:7px;border-left:4px solid var(--dim)}
+.line-card.e1{border-left-color:#22d3ee}.line-card.e2{border-left-color:var(--amber)}.line-card.e3{border-left-color:var(--magenta)}
+.line-card .meta{font-size:10px;font-family:var(--mono);color:var(--dim);margin:4px 0}
+.sec-item{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:7px;border-left:4px solid var(--cyan)}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--green);color:var(--green);padding:10px 16px;border-radius:8px;z-index:99;opacity:0;transition:.3s;pointer-events:none;max-width:92vw;font-size:13px;text-align:center}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;align-items:center;justify-content:center;padding:14px}
+.modal.show{display:flex}
+.mbox{background:var(--panel);border:1px solid var(--cyan);border-radius:12px;padding:16px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto}
+.notif-panel{position:fixed;top:0;right:0;width:340px;max-width:100vw;height:100%;background:var(--panel);border-left:1px solid var(--border);z-index:150;display:none;flex-direction:column}
+.notif-panel.show{display:flex}
+.notif-panel h3{padding:12px;border-bottom:1px solid var(--border);color:var(--cyan);font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.notif-list{flex:1;overflow-y:auto;padding:10px}
+.notif-item{padding:7px;border-bottom:1px solid rgba(42,42,69,.3);font-size:11px}
+.notif-item .time{color:var(--dim);font-size:10px}
+details.guide{background:var(--panel2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;padding:8px 10px}
+details.guide summary{cursor:pointer;font-size:13px;color:var(--cyan);padding:4px 0}
+details.guide div{font-size:12px;padding-top:6px;white-space:pre-line}
+footer{text-align:center;color:var(--dim);font-size:10px;padding:14px}
+</style>
+
+<style id="lb-phone-ux-day">
+header{position:fixed;top:0;left:0;right:0;z-index:60}
+body{padding-top:64px}
+.tl-sb{height:34px;margin-top:10px;touch-action:none}
+.tl-sb-thumb{min-width:52px;height:100%;touch-action:none;box-shadow:0 0 0 1px var(--border)}
+.tl-zoom input[type=range]{height:8px}
+.tl-zoom input[type=range]::-webkit-slider-thumb{width:26px;height:26px}
+.tl-transport{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.tl-transport button{min-width:64px;min-height:52px;font-size:20px;padding:12px 14px}
+.tl-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:8px;margin-top:10px}
+.tl-controls button{min-height:48px;font-size:14px;padding:12px 8px}
+@media(max-width:560px){
+.tl-controls{grid-template-columns:repeat(3,1fr)}
+.tl-transport button{flex:1}
+}
+body.day{--bg:#f3f6fb;--panel:#ffffff;--panel2:#e9eef7;--border:#b9c6de;--cyan:#0077b6;--magenta:#c2185b;--green:#2e7d32;--amber:#b45309;--txt:#101828;--dim:#4d5766;--danger:#c62828}
+body.day header{background:linear-gradient(180deg,#ffffff,#eef2f8)}
+body.day button.primary{background:rgba(0,119,182,.12)}
+body.day button.on{background:rgba(46,125,50,.14)}
+body.day .tcard.on{background:rgba(46,125,50,.10)}
+body.day .tl-wrap{background:#ffffff}
+body.day .tl-sb-thumb{background:rgba(0,119,182,.45)}
+body.day .line-card.e1{border-left-color:#0891b2}
+body.day .line-card.e2{border-left-color:#b45309}
+body.day .line-card.e3{border-left-color:#be185d}
+body.day .modal{background:rgba(15,23,42,.45)}
+</style>
+</head>
+<body>
+
+<script>
+window.__LB_BUILD='v1.5';
+window.addEventListener('load',function(){
+if(window.__LB_OK===true)return;
+var d=document.createElement('div');
+d.style.cssText='position:fixed;left:0;right:0;top:0;z-index:999;background:#2a0a12;color:#ff8095;border-bottom:2px solid #ff4d5e;font:12px/1.5 monospace;padding:12px;white-space:pre-line;max-height:70%;overflow:auto';
+d.textContent='❌ PUENTE LÍRICO · ARCHIVO INCOMPLETO / INCOMPLETE FILE\nbuild='+window.__LB_BUILD+' · __LB_OK='+String(window.__LB_OK)+'\nES: El script no terminó de evaluarse: copiado cortado o comillas convertidas. Verifica que el archivo termine en </html> y recópialo completo.\nEN: Script did not finish evaluating: truncated copy or converted quotes. Ensure the file ends with </html> and re-copy fully.';
+document.body.insertBefore(d,document.body.firstChild);
+});
+</script>
+
+<header>
+<div class="hdr-title"><h1>🌉 Puente Lírico · Lyric Bridge</h1><span>By Seny Clever · v1</span></div>
+<div class="hdr-btns">
+<button onclick="toggleTheme()" id="btnTheme" title="Día / Noche">☀️</button>
+<button onclick="toggleLang()" id="btnLang">🌐 EN</button>
+<button onclick="toggleNotifPanel()">🔔</button>
+<button onclick="undoAction()" id="btnUndo" disabled>↩️</button>
+<button onclick="redoAction()" id="btnRedo" disabled>↪️</button>
+<button class="primary" onclick="saveProject()">💾</button>
+<button onclick="document.getElementById('loadProj').click()">📂</button>
+<button onclick="clearSession()">🗑</button>
+<input type="file" id="loadProj" accept=".json" style="display:none">
+</div>
+</header>
+
+<div class="booterr" id="bootErr"></div>
+<div class="statusbar" id="statusBar"></div>
+
+<div class="wrap">
+<div class="warnings" id="warnings"></div>
+<div class="tabs" id="tabsBar"></div>
+
+<div class="tabpane" id="tab-cfg">
+<div class="panel"><h3 data-i18n="cfg.proj">📁 Proyecto</h3>
+<div class="row"><div class="field" style="flex:2"><label data-i18n="cfg.name">Nombre</label><input type="text" id="projectName"></div>
+<div class="field" style="flex:2"><label data-i18n="cfg.audio">🎧 Audio (opcional)</label><input type="file" id="audioFile" accept="audio/*"></div></div>
+<div class="row"><div class="field"><label data-i18n="cfg.dur">Duración total</label><input type="text" id="totalDuration" class="mono" placeholder="00:00:000"></div>
+<div class="field"><label data-i18n="cfg.fps">FPS</label><input type="number" id="fps" placeholder="—" min="1" max="120"></div></div>
+</div>
+
+<div class="panel"><h3 data-i18n="cfg.grid">🥁 Rejilla rítmica</h3>
+<div class="row"><div class="field"><label data-i18n="cfg.bpm">BPM</label><input type="number" id="bpm" placeholder="—" min="30" max="300" step="0.1"></div>
+<div class="field"><label data-i18n="cfg.offset">Offset beat 1 (ms)</label><input type="number" id="offsetMs" placeholder="0"></div>
+<div class="field"><label data-i18n="cfg.tap">Tap tempo</label><button onclick="tapTempo()">👆 TAP</button></div></div>
+<div class="hint" id="tapHint"></div>
+<div class="hint" data-i18n="cfg.gridHint">💡 beat=60000/BPM · compás=4 beats · frase=2 compases.</div>
+</div>
+
+<div class="panel"><h3 data-i18n="cfg.clips">🎞 Clips & layout</h3>
+<div class="row"><div class="field"><label data-i18n="cfg.target">Duración objetivo (s)</label><input type="number" id="targetDur" placeholder="—" min="1" max="60" step="0.5"></div>
+<div class="field"><label data-i18n="cfg.overlap">Solapamiento (s)</label><input type="number" id="overlapSec" placeholder="0" min="0" max="59" step="0.5"></div>
+<div class="field"><label data-i18n="cfg.bpl">Compases por línea</label><select id="barsPerLine"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="4">4</option></select></div></div>
+<div class="row"><div class="field"><label data-i18n="cfg.res">Resolución</label>
+<select id="techRes"><option value="">—</option>
+<optgroup id="ogH" label="Horizontal 16:9"><option value="854x480">854×480</option><option value="1280x720">1280×720</option><option value="1920x1080">1920×1080</option></optgroup>
+<optgroup id="ogV" label="Vertical 9:16"><option value="480x854">480×854</option><option value="720x1280">720×1280</option><option value="1080x1920">1080×1920</option></optgroup>
+<optgroup id="ogC" label="Personalizada"><option value="custom">✏️ Custom</option></optgroup>
+</select></div>
+<div class="field" id="customResF" style="display:none"><label>Custom W×H</label><div style="display:flex;gap:4px"><input type="number" id="customW" placeholder="W" style="width:70px"><input type="number" id="customH" placeholder="H" style="width:70px"></div></div>
+<div class="field"><label data-i18n="cfg.snapth">Umbral snap (ms)</label><input type="number" id="snapTh" placeholder="500"></div></div>
+<div class="row"><div class="field"><div class="tcard" id="tcFLF" onclick="tgFlf()"><span data-i18n="cfg.flf">🔗 First-Last-Frame</span></div></div></div>
+<div class="hint" data-i18n="cfg.targetHint">⚠ La duración objetivo es TECHO DURO por clip.</div>
+</div>
+</div>
+
+<div class="tabpane" id="tab-tl">
+<div class="panel"><h3 data-i18n="tl.title">🎵 Línea de Tiempo</h3>
+<div class="tl-wrap" id="tlWrap"><canvas id="tlBg" height="286"></canvas><canvas id="tlOv" height="286" style="position:absolute;top:0;left:0;pointer-events:none"></canvas></div>
+<div class="tl-sb" id="tlSb"><div class="tl-sb-thumb" id="tlThumb"></div></div>
+<div class="tl-zoom"><span class="dim">🔍</span><input type="range" id="zoomSlider" min="1" max="50" step="0.1" value="1"><span class="mono dim" id="zoomLbl">1.0x</span></div>
+
+<div class="tl-transport">
+<button class="primary" id="btnPlay" onclick="togglePlay()">▶</button>
+<button onclick="stopPB()">⏹</button>
+<span class="mono" id="tlCur" style="color:var(--cyan)">00:00:000</span><span class="dim">/</span><span class="mono dim" id="tlTot">00:00:000</span>
+</div>
+
+<div class="tl-controls">
+<button onclick="handleMark('line')" data-i18n="tl.markLine">✍ Línea (L)</button>
+<button onclick="handleMark('sec')" data-i18n="tl.markSec">📑 Sección (M)</button>
+<button id="snE" onclick="tgSnap('edges')" data-i18n="tl.snapE">🧲 Bordes</button>
+<button id="snB" onclick="tgSnap('beat')" data-i18n="tl.snapB">🥁 Beat</button>
+<button id="snBar" onclick="tgSnap('bar')" data-i18n="tl.snapBar">🎼 Compás</button>
+<button id="snPh" onclick="tgSnap('phrase')" data-i18n="tl.snapPh">🗣 Frase</button>
+</div>
+
+<div class="hint" data-i18n="tl.hint">🖱️ Rueda = zoom · doble clic en barra = editar · táctil: scroll vivo, arrastre = mover, doble tap = editar, tap = saltar.</div>
+</div>
+</div>
+
+<div class="tabpane" id="tab-lyr">
+<div class="panel"><h3 data-i18n="lyr.paste">✍️ Pegar letra completa</h3>
+<div class="row"><button class="primary" onclick="openPaste()" data-i18n="lyr.openPaste">📋 Pegar y auto-colocar</button>
+<button onclick="reflow()" data-i18n="lyr.reflow">🔁 Re-flow</button>
+<button onclick="document.getElementById('impLyrics').click()" data-i18n="lyr.import">📥 Importar .txt</button>
+<button onclick="dlLyricsTemplate()" data-i18n="lyr.export">📤 Exportar .txt</button>
+<button onclick="autoEnergyAll()" data-i18n="lyr.autoE">🪄 Auto-energía</button>
+<input type="file" id="impLyrics" accept=".txt" style="display:none"></div>
+<div class="hint" data-i18n="lyr.pasteHint">[Sección | intérprete | instrumental] como encabezados; cada verso = una línea. Requiere BPM + compases/línea.</div>
+</div>
+
+<div class="panel"><h3 data-i18n="lyr.sections">📑 Secciones</h3><div id="secList"></div></div>
+<div class="panel"><h3 data-i18n="lyr.lines">✍️ Líneas de letra</h3><div id="lineList"></div>
+<div class="hint" data-i18n="lyr.energyLegend">🔴 Punto + número = energía: E0 sin · E1 baja · E2 media · E3 alta.</div></div>
+</div>
+
+<div class="tabpane" id="tab-exp">
+<div class="panel"><h3 data-i18n="ex.val">✅ Validación</h3><div id="valPanel"></div>
+<div class="row" style="margin-top:8px"><button onclick="runSelfTest()" data-i18n="ex.selftest">🧪 Self-Test</button><span class="mono dim" id="stOut"></span></div>
+<div id="stPanel"></div>
+</div>
+
+<div class="panel"><h3 data-i18n="ex.bible">📖 Biblia / notas del director</h3>
+<textarea id="bible" rows="5"></textarea>
+<div class="row" style="margin-top:6px"><button class="small" onclick="loadBibleExample()" data-i18n="ex.bibleEx">🎬 Cargar Modo: Director para IA</button></div>
+</div>
+
+<div class="panel"><h3 data-i18n="ex.title">📤 Exportación</h3>
+<div class="row"><div class="field"><label data-i18n="ex.mpLang">Idioma del Prompt Maestro</label><select id="mpLang"><option value="es">Español</option><option value="en">English</option></select></div>
+<div class="field"><div class="tcard on" id="tcMinJSON" onclick="tgMpOpt('min')"><span data-i18n="ex.minJSON">🗜 JSON minificado</span></div></div>
+<div class="field"><div class="tcard on" id="tcTables" onclick="tgMpOpt('tables')"><span data-i18n="ex.tables">📊 Incluir tablas</span></div></div></div>
+<div class="hint mono" id="mpSize">—</div>
+<div class="row">
+<button class="primary" onclick="copyMP()" data-i18n="ex.copyMP">📋 Copiar Prompt Maestro</button>
+<button onclick="dlMP()" data-i18n="ex.dlMP">⬇ Prompt Maestro</button>
+</div>
+<div class="row">
+<button onclick="dlLyrics()" data-i18n="ex.dlLyrics">⬇ Letra .txt</button>
+<button onclick="dlSkeleton()" data-i18n="ex.dlSkel">⬇ Esqueleto .json</button>
+</div>
+</div>
+
+<div class="panel"><h3 data-i18n="ex.guide">📚 Guía del Puente Lírico</h3><div id="guideBox"></div></div>
+</div>
+</div>
+
+<div class="modal" id="pasteModal"><div class="mbox"><h3 style="color:var(--cyan);margin-bottom:8px" data-i18n="lyr.pasteTitle">📋 Pegar letra</h3>
+<textarea id="pasteArea" rows="12"></textarea>
+<div class="row" style="margin-top:8px"><button class="primary" onclick="doPaste()" data-i18n="tp.ok">✓</button><button onclick="closePaste()" data-i18n="tp.no">✕</button></div>
+</div></div>
+
+<div class="modal" id="secModal"><div class="mbox"><h3 id="smTitle" style="color:var(--cyan);margin-bottom:8px">📑 Sección</h3>
+<div class="hint mono" id="smRange" style="margin-bottom:8px"></div>
+<div id="smTimes" style="display:none">
+<div class="field" style="margin-bottom:6px"><label data-i18n="mk.start">Inicio</label><input type="text" id="smStart" class="mono" placeholder="00:00:000"></div>
+<div class="field" style="margin-bottom:6px"><label data-i18n="mk.end">Fin</label><input type="text" id="smEnd" class="mono" placeholder="00:00:000"></div>
+</div>
+<div class="field" style="margin-bottom:6px"><label data-i18n="mk.name">Nombre</label><input type="text" id="smName"></div>
+<div class="field" style="margin-bottom:6px"><label data-i18n="mk.inter">Intérprete</label><input type="text" id="smInter"></div>
+<div class="field" style="margin-bottom:8px"><div class="tcard" id="smInstC" onclick="smInst=!smInst;document.getElementById('smInstC').classList.toggle('on',smInst)"><span data-i18n="mk.inst">🎼 Instrumental</span></div></div>
+<div class="row"><button class="primary" onclick="secSave()" data-i18n="tp.ok">✓</button><button onclick="closeSec()" data-i18n="tp.no">✕</button></div>
+</div></div>
+
+<div class="modal" id="lineModal"><div class="mbox"><h3 style="color:var(--cyan);margin-bottom:8px" data-i18n="ln.title">✍ Editar línea</h3>
+<div class="hint mono" id="lmRange" style="margin-bottom:8px"></div>
+<div class="field" style="margin-bottom:6px"><label data-i18n="ln.text">Texto de la línea</label><textarea id="lmText" rows="2"></textarea></div>
+<div class="field" style="margin-bottom:6px"><label data-i18n="ln.inter">Intérprete</label><input type="text" id="lmInter"></div>
+<div class="field" style="margin-bottom:8px"><label data-i18n="ln.energy">Energía</label>
+<div class="row" style="margin:0"><button id="lmEnergy" onclick="lmCycleE()">—</button><button onclick="lmJump()">🎯</button></div></div>
+<div class="row"><button class="primary" onclick="lmSave(false)" data-i18n="tp.ok">✓</button><button onclick="lmSave(true)" data-i18n="ln.next">✓ y siguiente</button><button onclick="closeLineModal()" data-i18n="tp.no">✕</button></div>
+</div></div>
+
+<div class="notif-panel" id="notifPanel"><h3><span data-i18n="notif.title">🔔 Notificaciones</span><span><button class="small" onclick="clearNotifs()" data-i18n="notif.clear">Limpiar</button> <button class="small" onclick="toggleNotifPanel()">✕</button></span></h3><div class="notif-list" id="notifList"></div></div>
+<div class="toast" id="toast"></div>
+<footer>Puente Lírico · Lyric Bridge for AI Video — By Seny Clever · v1</footer>
+
+<script>
+var CONFIG={UNDO_LIMIT:50,NOTIF_LIMIT:50,TOAST_MS:2400,CANVAS_H:286,MIN_SEG_FLOOR:300,LS:'lb_v1',EDGE_PX:12,DRAG_TH_PX:6,SPLIT_KB:60,ZOOM_STEP:2,DBLTAP_MS:400,
+BANDS:{sec:[0,26],line:[28,52],wave:[56,210],grid:[212,232],rule:[232,286]},
+SECCOL:['#00e5ff','#ff2e88','#39ff8e','#ffb454','#a78bfa','#f97316','#22d3ee','#ec4899'],
+ENCOL:{0:'#8888a8',1:'#22d3ee',2:'#ffb454',3:'#ff2e88'}};
+var DEBUG=(location.search||'').indexOf('debug')>=0;
+function LOG(){if(DEBUG&&window.console){console.log.apply(window.console,arguments);}}
+function CLEAN(){return{projectName:'',bpm:null,offsetMs:null,fps:null,targetDur:null,overlapSec:null,barsPerLine:null,
+res:'',customW:null,customH:null,flf:false,snapTh:null,totalDurationMs:null,audioFileName:'',
+snap:{edges:false,beat:false,bar:false,phrase:false},sections:[],lines:[],bible:'',mpLang:null,mpMin:true,mpTables:true,
+nextSecId:1,nextLineId:1};}
+var P=CLEAN();
+var LANG=localStorage.getItem('lb_lang')||'es';
+var curTab='cfg';
+
+if(!CONFIG.SECCOL_DAY){
+CONFIG.SECCOL_DAY=['#0891b2','#be185d','#15803d','#b45309','#6d28d9','#c2410c','#0e7490','#9d174d'];
+CONFIG.ENCOL_DAY={0:'#6b7280',1:'#0891b2',2:'#b45309',3:'#be185d'};
+}
+var THEME='dark';
+try{THEME=localStorage.getItem('lb_theme')||'dark';}catch(e){}
+function isDay(){return document.body&&document.body.classList.contains('day');}
+function seccol(i){return(isDay()?CONFIG.SECCOL_DAY:CONFIG.SECCOL)[i%8];}
+function encol(e){var pal=isDay()?CONFIG.ENCOL_DAY:CONFIG.ENCOL;return pal[e||0];}
+function applyTheme(){if(THEME!=='day')THEME='dark';document.body.classList.toggle('day',THEME==='day');var b=$('btnTheme');if(b)b.textContent=THEME==='day'?'🌙':'☀️';}
+function toggleTheme(){THEME=(THEME==='day')?'dark':'day';try{localStorage.setItem('lb_theme',THEME);}catch(e){}applyTheme();fitHeader();renderAll();drawTL();drawPH(curMs());updSB();}
+function fitHeader(){var h=document.querySelector('header');if(h)document.body.style.paddingTop=h.offsetHeight+'px';}
+applyTheme();fitHeader();window.addEventListener('load',function(){fitHeader();});
+
+var audioCtx=null,audioBuffer=null,srcNode=null,aS={playing:false,off:0,t0:0,raf:null};
+var zoom=1,scrollMs=0,taps=[];
+var mark={line:'idle',sec:'idle'},markStart={line:0,sec:0},pendSec=null,smInst=false,editSecIdx=-1;
+var drag={on:false,type:null,idx:-1,edge:null,x0:0,y0:0,t0:null,oS:0,oE:0,snap:null,pending:null,pendMs:0};
+var lastTap={t:null,idx:-1,at:0};
+var editLineIdx=-1,lmSnap=null;
+var undoStack=[],redoStack=[],notifLog=[];
+
+var I18N={es:{
+'tab.cfg':'⚙️ Config','tab.tl':'🎵 Timeline','tab.lyr':'✍️ Letra','tab.exp':'📤 Exportar',
+'cfg.proj':'📁 Proyecto','cfg.name':'Nombre','cfg.audio':'🎧 Audio (opcional)','cfg.dur':'Duración total','cfg.fps':'FPS',
+'cfg.grid':'🥁 Rejilla rítmica','cfg.bpm':'BPM','cfg.offset':'Offset beat 1 (ms)','cfg.tap':'Tap tempo','cfg.gridHint':'💡 beat=60000/BPM · compás=4 beats · frase=2 compases.',
+'cfg.clips':'🎞 Clips & layout','cfg.target':'Duración objetivo (s)','cfg.overlap':'Solapamiento (s)','cfg.bpl':'Compases por línea','cfg.res':'Resolución','cfg.flf':'🔗 First-Last-Frame','cfg.snapth':'Umbral snap (ms)','cfg.targetHint':'⚠ La duración objetivo es TECHO DURO por clip.',
+'tl.title':'🎵 Línea de Tiempo','tl.markLine':'✍ Línea (L)','tl.markSec':'📑 Sección (M)','tl.snapE':'🧲 Bordes','tl.snapB':'🥁 Beat','tl.snapBar':'🎼 Compás','tl.snapPh':'🗣 Frase','tl.hint':'🖱️ Rueda = zoom · doble clic en barra = editar · táctil: scroll vivo, arrastre = mover, doble tap = editar, tap = saltar.',
+'lyr.paste':'✍️ Pegar letra completa','lyr.openPaste':'📋 Pegar y auto-colocar','lyr.reflow':'🔁 Re-flow','lyr.import':'📥 Importar .txt','lyr.export':'📤 Exportar .txt','lyr.autoE':'🪄 Auto-energía','lyr.pasteHint':'[Sección | intérprete | instrumental] como encabezados; cada verso = una línea. Requiere BPM + compases/línea.','lyr.pasteTitle':'📋 Pegar letra','lyr.sections':'📑 Secciones','lyr.lines':'✍️ Líneas de letra','lyr.energyLegend':'🔴 Punto + número = energía: E0 sin · E1 baja · E2 media · E3 alta.',
+'mk.name':'Nombre','mk.inter':'Intérprete','mk.inst':'🎼 Instrumental','mk.start':'Inicio','mk.end':'Fin','mk.newTitle':'📑 Nueva sección','mk.editTitle':'✎ Editar sección','tp.ok':'✓','tp.no':'✕',
+'ln.title':'✍ Editar línea','ln.text':'Texto de la línea','ln.inter':'Intérprete','ln.energy':'Energía','ln.next':'✓ y siguiente',
+'e0':'Sin energía','e1':'Baja','e2':'Media','e3':'Alta',
+'ex.val':'✅ Validación','ex.selftest':'🧪 Self-Test','ex.bible':'📖 Biblia / notas del director','ex.bibleEx':'🎬 Cargar Modo: Director para IA','ex.title':'📤 Exportación','ex.mpLang':'Idioma del Prompt Maestro','ex.minJSON':'🗜 JSON minificado','ex.tables':'📊 Incluir tablas','ex.copyMP':'📋 Copiar Prompt Maestro','ex.dlMP':'⬇ Prompt Maestro','ex.dlLyrics':'⬇ Letra .txt','ex.dlSkel':'⬇ Esqueleto .json','ex.guide':'📚 Guía del Puente Lírico',
+'notif.title':'🔔 Notificaciones','notif.clear':'Limpiar',
+'toast.lang':'Idioma: Español','toast.saved':'💾 Proyecto guardado','toast.loaded':'📂 Proyecto cargado','toast.cleared':'🗑 Sesión limpia','toast.audio':'🎧 Audio cargado','toast.paste':'✅ Líneas colocadas','toast.reflow':'🔁 Re-flow aplicado','toast.copy':'📋 Copiado','toast.need':'⚠ Falta: ','toast.markS':'📍 INICIO','toast.markE':'✅ marcados','toast.endStart':'⚠ Fin después del inicio','toast.noSec':'⚠ Crea una sección primero','toast.tap':'👆 tap','toast.tapOk':'🥁 BPM+fase detectados','toast.dl':'⬇ descargado','toast.noLines':'⚠ Sin líneas con tiempo','toast.undo':'↩️ Deshecho','toast.redo':'↪️ Rehecho','toast.noundo':'↩️ nada que deshacer','toast.importRep':'📥 Reemplazado','toast.importMerge':'📥 Fusionado','toast.big':'⚠ Prompt grande: dividido en partes','toast.st':'🧪 Self-Test: ','toast.boot':'⚠ Módulo falló al arrancar (ver banner)','toast.lnSave':'✍ Línea guardada','toast.secSave':'📑 Sección actualizada'},
+en:{
+'tab.cfg':'⚙️ Config','tab.tl':'🎵 Timeline','tab.lyr':'✍️ Lyrics','tab.exp':'📤 Export',
+'cfg.proj':'📁 Project','cfg.name':'Name','cfg.audio':'🎧 Audio (optional)','cfg.dur':'Total duration','cfg.fps':'FPS',
+'cfg.grid':'🥁 Rhythm grid','cfg.bpm':'BPM','cfg.offset':'Beat 1 offset (ms)','cfg.tap':'Tap tempo','cfg.gridHint':'💡 beat=60000/BPM · bar=4 beats · phrase=2 bars.',
+'cfg.clips':'🎞 Clips & layout','cfg.target':'Target duration (s)','cfg.overlap':'Overlap (s)','cfg.bpl':'Bars per line','cfg.res':'Resolution','cfg.flf':'🔗 First-Last-Frame','cfg.snapth':'Snap threshold (ms)','cfg.targetHint':'⚠ Target duration is the HARD CEILING per clip.',
+'tl.title':'🎵 Timeline','tl.markLine':'✍ Line (L)','tl.markSec':'📑 Section (M)','tl.snapE':'🧲 Edges','tl.snapB':'🥁 Beat','tl.snapBar':'🎼 Bar','tl.snapPh':'🗣 Phrase','tl.hint':'️ Wheel = zoom · double-click bar = edit · touch: scroll alive, drag = move, double-tap = edit, tap = seek.',
+'lyr.paste':'✍️ Paste full lyrics','lyr.openPaste':'📋 Paste & auto-layout','lyr.reflow':'🔁 Re-flow','lyr.import':'📥 Import .txt','lyr.export':'📤 Export .txt','lyr.autoE':'🪄 Auto-energy','lyr.pasteHint':'[Section | interpreter | instrumental] headers; each verse = one line. Requires BPM + bars/line.','lyr.pasteTitle':'📋 Paste lyrics','lyr.sections':'📑 Sections','lyr.lines':'✍️ Lyric lines','lyr.energyLegend':'🔴 Dot + number = energy: E0 none · E1 low · E2 mid · E3 high.',
+'mk.name':'Name','mk.inter':'Interpreter','mk.inst':'🎼 Instrumental','mk.start':'Start','mk.end':'End','mk.newTitle':'📑 New section','mk.editTitle':'✎ Edit section','tp.ok':'✓','tp.no':'✕',
+'ln.title':'✍ Edit line','ln.text':'Line text','ln.inter':'Interpreter','ln.energy':'Energy','ln.next':'✓ and next',
+'e0':'No energy','e1':'Low','e2':'Mid','e3':'High',
+'ex.val':'✅ Validation','ex.selftest':'🧪 Self-Test','ex.bible':'📖 Bible / director notes','ex.bibleEx':'🎬 Load Mode: AI Director','ex.title':'📤 Export','ex.mpLang':'Master Prompt language','ex.minJSON':'🗜 Minified JSON','ex.tables':'📊 Include tables','ex.copyMP':'📋 Copy Master Prompt','ex.dlMP':'⬇ Master Prompt','ex.dlLyrics':'⬇ Lyrics .txt','ex.dlSkel':'⬇ Skeleton .json','ex.guide':'📚 Lyric Bridge Guide',
+'notif.title':'🔔 Notifications','notif.clear':'Clear',
+'toast.lang':'Language: English','toast.saved':'💾 Project saved','toast.loaded':'📂 Project loaded','toast.cleared':'🗑 Clean session','toast.audio':'🎧 Audio loaded','toast.paste':'✅ Lines placed','toast.reflow':'🔁 Re-flow applied','toast.copy':'📋 Copied','toast.need':'⚠ Missing: ','toast.markS':'📍 START','toast.markE':'✅ marked','toast.endStart':'⚠ End after start','toast.noSec':'⚠ Create a section first','toast.tap':'👆 tap','toast.tapOk':'🥁 BPM+phase detected','toast.dl':'⬇ downloaded','toast.noLines':'⚠ No timed lines','toast.undo':'↩️ Undone','toast.redo':'↪️ Redone','toast.noundo':'↩️ nothing to undo','toast.importRep':'📥 Replaced','toast.importMerge':'📥 Merged','toast.big':'⚠ Large prompt: split into parts','toast.st':'🧪 Self-Test: ','toast.boot':'⚠ A module failed at boot (see banner)','toast.lnSave':'✍ Line saved','toast.secSave':'📑 Section updated'}};
+function t(k){return(I18N[LANG]&&I18N[LANG][k])||I18N.es[k]||k;}
+function L(es,en){return LANG==='es'?es:en;}
+
+var GUIDE=[
+{i:'1️⃣',es:['Configura','Audio opcional 🎧. BPM a mano o 👆 TAP (6+ golpecitos al ritmo). FPS de tu IA. ⚠️ Duración Objetivo = segundos MÁXIMOS por clip (techo duro). "Compases por línea" = compases que dura cada verso (rap = 2). Todo arranca vacío.'],en:['Setup','Optional audio 🎧. BPM by hand or 👆 TAP (6+ taps on the beat). FPS of your AI. ⚠️ Target Duration = MAX seconds per clip (hard ceiling). "Bars per line" = bars each verse lasts (rap = 2). Everything starts empty.']},
+{i:'2️⃣',es:['Pega la letra','Encabezados entre corchetes crean secciones: [Intro | instrumental], [Coro | Interprete]. Cada verso suelto = una barra de color colocada sola sobre la rejilla musical. Si algo queda desubicado, lo arrastras después.'],en:['Paste lyrics','Bracket headers create sections: [Intro | instrumental], [Chorus | Interpreter]. Each loose verse = a colored bar auto-placed on the musical grid. If something lands off, drag it later.']},
+{i:'3️⃣',es:['Afina al oído','▶ y arrastra bordes hasta coincidir con lo que escuchas. Snaps: 🧲 bordes · 🥁 beat · 🎼 compás · 🗣 frase (2 compases). Rueda del ratón = zoom; en móvil el scroll vertical vive y el arrastre horizontal mueve. Tap = saltar. L y M marcan al vuelo.'],en:['Fine-tune by ear','▶ and drag edges until they match what you hear. Snaps: 🧲 edges · 🥁 beat ·  bar ·  phrase (2 bars). Mouse wheel = zoom; on mobile vertical scroll stays alive and horizontal drag moves. Tap = seek. L and M mark live.']},
+{i:'4️⃣',es:['Escribe sin salir del Timeline','Doble clic (o doble tap) en una barra de línea = ventana ✍ con texto, intérprete, energía y "✓ y siguiente" para encadenar toda la canción. Doble tap en barra de sección = ✎ editar nombre, intérprete, instrumental y tiempos exactos.'],en:['Write without leaving the Timeline','Double-click (or double-tap) a line bar = ✍ window with text, interpreter, energy and "✓ and next" to chain the whole song. Double-tap a section bar = ✎ edit name, interpreter, instrumental and exact times.']},
+{i:'5️⃣',es:['Energía','Cada línea muestra punto de color + número: E0 sin, E1 baja, E2 media, E3 alta (botón cíclico o 🪄 auto por puntuación/longitud). En el Prompt Maestro la energía = intensidad de cámara (E0 quieto, E3 movimiento fuerte).'],en:['Energy','Each line shows color dot + number: E0 none, E1 low, E2 mid, E3 high (cycle button or 🪄 auto by punctuation/length). In the Master Prompt energy = camera intensity (E0 still, E3 strong movement).']},
+{i:'6️⃣',es:['Re-flow','🔁 recalcula la duración de TODAS las líneas con "Compases por línea" y las coloca en fila desde el inicio de su sección. Ej.: BPM 170 + preset 2 → cada línea = 2 compases (≈2,82 s). Úsalo tras cambiar BPM o preset. ⚠️ Sobrescribe bordes arrastrados a mano (para eso está ↩️).'],en:['Re-flow','🔁 recomputes ALL line durations with "Bars per line" and places them in a row from their section start. E.g. BPM 170 + preset 2 → each line = 2 bars (≈2.82 s). Use after changing BPM or preset. ⚠️ Overwrites hand-dragged edges (that is what ↩️ is for).']},
+{i:'7️⃣',es:['Valida y exporta','✅ Validación revisa avisos, solapes y cobertura. 🧪 Self-Test es una prueba técnica del motor interno: comprueba partición compatible con Beat Calculator, round-trip de letra, idiomas y frames; no es un certificado externo, pero ayuda a detectar rupturas del contrato antes de importar en la Calculadora. 🗜 JSON minificado ON: el esqueleto sale compacto, pesa menos y es mejor para pegar en IA; OFF: sale indentado, más legible y fácil de auditar, pero pesa más. 📊 Incluir tablas ON: añade secciones, líneas y tabla clip×línea al Prompt Maestro para que la IA entienda la sincronía; OFF: solo incluye datos mínimos y el JSON, útil para prompts más cortos. Recomendado: minificado ON + tablas ON para enviar; minificado OFF + tablas ON si necesitas revisar el JSON. 📋 Prompt Maestro entrega TODO listo para que la IA solo rellene creatividad. Si pasa de 60 KB, se descarga en 2 partes.'],en:['Validate & export','✅ Validation checks warnings, overlaps and coverage. 🧪 Self-Test is a technical engine test: it checks Calculator-compatible partition, lyric round-trip, languages and frames; it is not an external certification, but it helps detect contract breaks before importing into the Calculator. 🗜 Minified JSON ON: skeleton is compact, smaller and better for pasting into an AI; OFF: indented, more readable and easier to audit, but larger. 📊 Include tables ON: adds sections, lines and clip×line table to the Master Prompt so the AI understands sync; OFF: includes only minimal data and JSON, useful for shorter prompts. Recommended: minified ON + tables ON for sending; minified OFF + tables ON if you need to inspect the JSON. 📋 Master Prompt delivers EVERYTHING ready so the AI only fills creative fields. Over 60 KB it downloads in 2 parts.']},
+{i:'8️⃣',es:['En la Calculadora','Importa el JSON de tu IA y NO pulses Generar/Actualizar (los clips ya vienen particionados con ids y frames exactos). Exporta el informe para tu IA de video. Enhance OFF y refs character-only.'],en:['In the Calculator','Import your AI JSON and do NOT press Generate/Update (clips come pre-partitioned with exact ids and frames). Export the report for your video AI. Enhance OFF and character-only refs.']},
+{i:'🔔',es:['Integridad','La campanita guarda 50 avisos con hora (incluidos errores JS). Si el archivo llega truncado al copiarlo, un banner rojo lo explica al abrir (watchdog).'],en:['Integrity','The bell keeps 50 timed notices (including JS errors). If the file arrives truncated when copying, a red banner explains on open (watchdog).']},
+{i:'🧩',es:['Jerarquía','LETRA ➜ LÍNEA ➜ SECCIÓN ➜ CLIP. Los clips = partir cada sección con la Duración Objetivo como techo, con el MISMO algoritmo de la Calculadora: el esqueleto sobrevive intacto al importar.'],en:['Hierarchy','LYRICS ➜ LINE ➜ SECTION ➜ CLIP. Clips = splitting each section with Target Duration as ceiling, using the SAME Calculator algorithm: the skeleton survives import intact.']}];
+
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function msToTime(ms){if(ms==null||isNaN(ms))return'00:00:000';ms=Math.max(0,Math.round(ms));
+var m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000),f=Math.floor(ms%1000);
+return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+':'+String(f).padStart(3,'0');}
+function timeToMs(s){if(!s)return 0;s=String(s).trim().replace(/,/g,'.');
+if(s.indexOf(':')>=0){var p=s.split(':');if(p.length===3)return(+p[0]||0)*60000+(+p[1]||0)*1000+(+p[2]||0);
+if(p.length===2)return(+p[0]||0)*60000+(+p[1]||0)*1000;}
+var v=parseFloat(s);return isNaN(v)?0:Math.round(v*1000);}
+function fmtDur(ms){return ms==null?'—':(ms/1000).toFixed(2)+'s';}
+function sn(s){return(s||'proyecto').replace(/[^\w\- ]/g,'').replace(/\s+/g,'_');}
+function dl(fn,ct){var b=new Blob([ct],{type:'text/plain;charset=utf-8'});var a=document.createElement('a');
+a.href=URL.createObjectURL(b);a.download=fn;a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},1000);}
+function cp(x){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(x).then(function(){toast(t('toast.copy'));},function(){cpFallback(x);});}else cpFallback(x);}
+function cpFallback(x){var ta=document.createElement('textarea');ta.value=x;document.body.appendChild(ta);ta.select();
+try{document.execCommand('copy');}catch(e){}ta.remove();toast(t('toast.copy'));}
+
+function pushNotif(text,type){notifLog.unshift({text:text,time:new Date().toLocaleTimeString(),type:type||'ok'});
+if(notifLog.length>CONFIG.NOTIF_LIMIT)notifLog.pop();renderNotifs();}
+function toast(msg,type){var el=$('toast');el.textContent=msg;
+el.style.borderColor=type==='err'?'var(--danger)':type==='warn'?'var(--amber)':'var(--green)';
+el.style.color=el.style.borderColor;el.classList.add('show');setTimeout(function(){el.classList.remove('show');},CONFIG.TOAST_MS);
+pushNotif(msg,type);}
+function renderNotifs(){var el=$('notifList');if(!el)return;
+el.innerHTML=notifLog.map(function(n){return '<div class="notif-item"><span class="time">['+n.time+']</span> '+esc(n.text)+'</div>';}).join('')||'—';}
+function toggleNotifPanel(){$('notifPanel').classList.toggle('show');}
+function clearNotifs(){notifLog=[];renderNotifs();}
+window.addEventListener('error',function(e){pushNotif('⚠ JS: '+e.message,'err');});
+
+function snapState(){return JSON.parse(JSON.stringify({s:P.sections,l:P.lines,ns:P.nextSecId,nl:P.nextLineId}));}
+function pushUndoSnap(d,label){undoStack.push({d:d,l:label||''});if(undoStack.length>CONFIG.UNDO_LIMIT)undoStack.shift();redoStack=[];syncUndoBtns();}
+function pushUndo(label){pushUndoSnap(snapState(),label);}
+function restoreSnap(d){P.sections=d.s;P.lines=d.l;P.nextSecId=d.ns;P.nextLineId=d.nl;renderAll();autosave();}
+function undoAction(){if(!undoStack.length){toast(t('toast.noundo'),'warn');return;}
+redoStack.push({d:snapState(),l:''});if(redoStack.length>CONFIG.UNDO_LIMIT)redoStack.shift();
+restoreSnap(undoStack.pop().d);toast(t('toast.undo'));}
+function redoAction(){if(!redoStack.length){toast(t('toast.noundo'),'warn');return;}
+undoStack.push({d:snapState(),l:''});if(undoStack.length>CONFIG.UNDO_LIMIT)undoStack.shift();
+restoreSnap(redoStack.pop().d);toast(t('toast.redo'));}
+function syncUndoBtns(){var u=$('btnUndo'),r=$('btnRedo');if(u)u.disabled=!undoStack.length;if(r)r.disabled=!redoStack.length;}
+
+var lsTimer=null;
+function autosave(){clearTimeout(lsTimer);lsTimer=setTimeout(function(){try{localStorage.setItem(CONFIG.LS,JSON.stringify({v:1,P:P,tab:curTab}));}catch(e){LOG('autosave',e);}},600);}
+function migrate(d){var o=CLEAN();if(!d||typeof d!=='object')return o;
+var k;for(k in d){if(Object.prototype.hasOwnProperty.call(d,k))o[k]=d[k];}
+o.snap={edges:false,beat:false,bar:false,phrase:false};
+if(d.snap){o.snap.edges=!!d.snap.edges;o.snap.beat=!!d.snap.beat;o.snap.bar=!!d.snap.bar;o.snap.phrase=!!d.snap.phrase;}
+o.sections=Array.isArray(d.sections)?d.sections:[];o.lines=Array.isArray(d.lines)?d.lines:[];
+o.nextSecId=+d.nextSecId||1;o.nextLineId=+d.nextLineId||1;
+o.mpMin=d.mpMin!==false;o.mpTables=d.mpTables!==false;
+o.sections.forEach(function(s){s.id=+s.id||0;s.startMs=+s.startMs||0;s.endMs=+s.endMs||0;s.name=s.name||'?';});
+o.lines.forEach(function(l){l.id=+l.id||0;l.startMs=+l.startMs||0;l.endMs=+l.endMs||0;l.text=l.text||'';l.energy=(l.energy==null?null:+l.energy);});
+return o;}
+function restoreSession(){var raw=localStorage.getItem(CONFIG.LS);if(!raw)return;
+var d=JSON.parse(raw);if(d&&d.P){P=migrate(d.P);curTab=d.tab||'cfg';LOG('session restored');}}
+function saveProject(){readCfg();dl(sn(P.projectName)+'_PuenteLirico.json',JSON.stringify({app:'PuenteLirico',version:'1.0',P:P},null,2));toast(t('toast.saved'));}
+function loadProject(tx){try{var d=JSON.parse(tx);if(!d||!d.P)throw 0;P=migrate(d.P);undoStack=[];redoStack=[];writeCfg();renderAll();autosave();toast(t('toast.loaded'));}catch(e){toast('⚠','err');}}
+function clearSession(){if(!confirm(L('¿Limpiar sesión y recargar?','Clear session and reload?')))return;localStorage.removeItem(CONFIG.LS);location.reload();}
+
+function initAC(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();}
+function loadAudio(f){initAC();P.audioFileName=f.name;var r=new FileReader();
+r.onload=function(e){audioCtx.decodeAudioData(e.target.result).then(function(buf){audioBuffer=buf;
+P.totalDurationMs=Math.round(audioBuffer.duration*1000);writeCfg();renderAll();autosave();toast(t('toast.audio'));},function(){toast('⚠','err');});};
+r.readAsArrayBuffer(f);}
+function curMs(){return aS.playing?Math.min(aS.off+(performance.now()-aS.t0),P.totalDurationMs||0):aS.off;}
+function togglePlay(){if(!audioBuffer){toast('⚠','warn');return;}initAC();if(audioCtx.state==='suspended')audioCtx.resume();
+if(aS.playing)pausePB();else startPB();}
+function killNode(){if(srcNode){srcNode.onended=null;try{srcNode.stop();}catch(e){}}srcNode=null;}
+function startPB(){if(!audioBuffer)return;killNode();srcNode=audioCtx.createBufferSource();srcNode.buffer=audioBuffer;srcNode.connect(audioCtx.destination);
+srcNode.start(0,Math.min(aS.off/1000,audioBuffer.duration));aS.t0=performance.now();aS.playing=true;$('btnPlay').textContent='⏸';
+srcNode.onended=function(){if(aS.playing)stopPB();};animPH();}
+function pausePB(){if(!aS.playing)return;aS.off=curMs();killNode();aS.playing=false;cancelAnimationFrame(aS.raf);$('btnPlay').textContent='▶';}
+function stopPB(){killNode();aS.playing=false;aS.off=0;cancelAnimationFrame(aS.raf);$('btnPlay').textContent='▶';drawPH(0);$('tlCur').textContent=msToTime(0);}
+function seekTo(ms){var max=P.totalDurationMs||0;ms=Math.max(0,Math.min(ms,max));var w=aS.playing;
+if(w){killNode();aS.playing=false;cancelAnimationFrame(aS.raf);}aS.off=ms;
+if(w)startPB();else{drawPH(ms);$('tlCur').textContent=msToTime(ms);}}
+function animPH(){if(!aS.playing)return;var c=curMs();if(c>=(P.totalDurationMs||Infinity)){stopPB();return;}
+$('tlCur').textContent=msToTime(c);drawPH(c);aS.raf=requestAnimationFrame(animPH);}
+
+function beatMs(){return P.bpm?60000/P.bpm:null;}
+function barMs(){var b=beatMs();return b?b*4:null;}
+function phraseMs(){var b=barMs();return b?b*2:null;}
+function offMs(){return P.offsetMs||0;}
+function gridTimes(step,s0,s1){var out=[];if(!step||step<=0)return out;
+var k=Math.ceil((s0-offMs())/step-1e-9),tt=offMs()+k*step;
+for(;tt<=s1+1e-9;tt+=step){if(tt>=s0-1e-9)out.push(tt);}return out;}
+function snapGridOn(){return P.snap.beat||P.snap.bar||P.snap.phrase;}
+function gridBeatsInRange(s0,s1){if(!snapGridOn())return[];var set={},i,g,out=[];
+if(P.snap.beat){var a=gridTimes(beatMs(),s0,s1);for(i=0;i<a.length;i++)set[a[i]]=1;}
+if(P.snap.bar){var b=gridTimes(barMs(),s0,s1);for(i=0;i<b.length;i++)set[b[i]]=1;}
+if(P.snap.phrase){var c=gridTimes(phraseMs(),s0,s1);for(i=0;i<c.length;i++)set[c[i]]=1;}
+for(g in set){if(Object.prototype.hasOwnProperty.call(set,g))out.push(+g);}
+out.sort(function(x,y){return x-y;});
+return out.map(function(timeMs){return{timeMs:timeMs};});}
+function partition(s0,e0){var D=Math.max(500,(P.targetDur||0)*1000),range=e0-s0;
+if(range<=0||!P.targetDur)return{clips:[],warnMin:false};
+var n=Math.max(1,Math.ceil(range/D-1e-9)),base=range/n,min=0;
+if(min&&base<min-1)return{clips:[{startMs:s0,endMs:e0,S:0}],warnMin:true};
+var minSeg=Math.max(min||0,CONFIG.MIN_SEG_FLOOR),bounds=[s0],beats=gridBeatsInRange(s0,e0),i,b;
+for(i=1;i<n;i++){b=s0+i*base;
+if(beats.length){var best=null,bd=P.snapTh||500,j;
+for(j=0;j<beats.length;j++){var bt=beats[j];
+if(bt.timeMs<=b&&bt.timeMs>bounds[i-1]){var d=b-bt.timeMs;if(d<bd){bd=d;best=bt;}}}
+if(best){var cand=best.timeMs,segA=cand-bounds[i-1];
+if(segA>=minSeg&&segA<=D&&(base+(b-cand))<=D)b=cand;}}
+bounds.push(b);}
+bounds.push(e0);
+var S=Math.max(0,(P.overlapSec||0)*1000);if(S>=base)S=Math.max(0,base-500);
+var out2=[];for(i=0;i<bounds.length-1;i++){var a2=bounds[i],b2=bounds[i+1];if(b2<=a2)continue;out2.push({startMs:a2,endMs:b2,S:S});}
+return{clips:out2,warnMin:false};}
+function computeClips(){var out=[];if(!P.targetDur)return out;
+var sorted=P.sections.slice().sort(function(a,b){return a.startMs-b.startMs;});
+sorted.forEach(function(sec){var si=P.sections.indexOf(sec);
+partition(sec.startMs,sec.endMs).clips.forEach(function(pc){out.push({sectionIdx:si,startMs:pc.startMs,endMs:pc.endMs,S:pc.S});});});
+out.sort(function(a,b){return a.startMs-b.startMs;});
+return out.map(function(c,i){var dur=c.endMs-c.startMs;
+return{id:i+1,sectionIdx:c.sectionIdx,startMs:c.startMs,endMs:c.endMs,S:c.S,genDurMs:dur,coreDurMs:Math.max(0,dur-c.S),
+frames:P.fps?Math.round(dur/1000*P.fps):null,D:(P.targetDur||0)*1000};});}
+function lineClipTable(){var clips=computeClips();
+return clips.map(function(c){var hits=[];P.lines.forEach(function(ln,li){var ov=Math.min(c.endMs,ln.endMs)-Math.max(c.startMs,ln.startMs);
+if(ov>0)hits.push({n:li+1,pct:Math.round(ov/Math.max(1,ln.endMs-ln.startMs)*100)});});
+return{clip:c.id,range:[c.startMs,c.endMs],frames:c.frames,lines:hits};});}
+
+function tgSnap(w){P.snap[w]=!P.snap[w];var m={edges:'snE',beat:'snB',bar:'snBar',phrase:'snPh'};
+$(m[w]).classList.toggle('on',P.snap[w]);autosave();drawTL();}
+function snapMs(ms,ex){ex=ex||{};var best=ms,bd=Infinity,th=P.snapTh||500,i,g;
+if(P.snap.edges){var T=[0,P.totalDurationMs||0];
+P.sections.forEach(function(s,idx){if(idx!==ex.sec){T.push(s.startMs,s.endMs);}});
+P.lines.forEach(function(l,idx){if(idx!==ex.line){T.push(l.startMs,l.endMs);}});
+for(i=0;i<T.length;i++){g=T[i];var d=Math.abs(ms-g);if(d<th&&d<bd){bd=d;best=g;}}}
+var cand=[];if(P.snap.beat)cand.push(beatMs());if(P.snap.bar)cand.push(barMs());if(P.snap.phrase)cand.push(phraseMs());
+for(i=0;i<cand.length;i++){var st=cand[i];if(!st)continue;var gs=gridTimes(st,ms-th,ms+th);
+for(var j=0;j<gs.length;j++){g=gs[j];var d2=Math.abs(ms-g);if(d2<th&&d2<bd){bd=d2;best=g;}}}
+return best;}
+
+function cW(){return $('tlWrap').clientWidth||800;}
+function t2x(ms){return((ms-scrollMs)/((P.totalDurationMs||1)/zoom))*cW();}
+function x2t(x){return scrollMs+(x/cW())*((P.totalDurationMs||1)/zoom);}
+function clampScroll(){var td=P.totalDurationMs||1,v=td/zoom;scrollMs=Math.max(0,Math.min(scrollMs,td-v));}
+
+function drawTL(){var bg=$('tlBg'),ov=$('tlOv');if(!bg||!ov)return;var W=cW(),H=CONFIG.CANVAS_H;
+bg.width=W;bg.height=H;ov.width=W;ov.height=H;
+var c=bg.getContext('2d');c.fillStyle=isDay()?'#f8fafc':'#0d0d18';c.fillRect(0,0,W,H);
+var td=P.totalDurationMs||0;if(td<=0)return;var B=CONFIG.BANDS;
+P.sections.forEach(function(s,i){var x1=t2x(s.startMs),x2=t2x(s.endMs);if(x2<0||x1>W)return;var col=seccol(i);
+c.fillStyle=col;c.globalAlpha=.25;c.fillRect(x1,B.sec[0],Math.max(1,x2-x1),26);c.globalAlpha=1;
+c.strokeStyle=col;c.strokeRect(x1,B.sec[0],Math.max(1,x2-x1),26);
+c.fillStyle=col;c.fillRect(x1-2,B.sec[0],4,26);c.fillRect(x2-2,B.sec[0],4,26);
+c.font='bold 9px sans-serif';c.textBaseline='middle';if(x2-x1>25)c.fillText((s.instrumental?'🎼 ':'')+s.name.slice(0,16),x1+6,13);});
+P.lines.forEach(function(ln,i){var x1=t2x(ln.startMs),x2=t2x(ln.endMs);if(x2<0||x1>W)return;var col=encol(ln.energy);
+c.fillStyle=col;c.globalAlpha=.28;c.fillRect(x1,B.line[0],Math.max(1,x2-x1),24);c.globalAlpha=1;
+c.strokeStyle=col;c.strokeRect(x1,B.line[0],Math.max(1,x2-x1),24);
+c.fillStyle=col;c.fillRect(x1-1,B.line[0],3,24);c.fillRect(x2-2,B.line[0],3,24);
+c.font='8px sans-serif';c.textBaseline='middle';if(x2-x1>18)c.fillText(String(i+1),x1+5,40);});
+if(audioBuffer)drawWF(c,W,B.wave[0],B.wave[1]-B.wave[0]);
+var y0=B.grid[0],y1=B.grid[1];
+[[beatMs(),isDay()?'rgba(190,24,93,.35)':'rgba(255,46,136,.35)',1],[barMs(),isDay()?'rgba(190,24,93,.75)':'rgba(255,46,136,.75)',1.5],[phraseMs(),isDay()?'rgba(8,145,178,.9)':'rgba(0,229,255,.9)',2]].forEach(function(item){
+var st=item[0],col=item[1],lw=item[2];if(!st)return;
+gridTimes(st,scrollMs,scrollMs+td/zoom).forEach(function(g){var x=t2x(g);if(x<0||x>W)return;
+c.strokeStyle=col;c.lineWidth=lw;c.beginPath();c.moveTo(x,y0);c.lineTo(x,y1);c.stroke();});});
+c.lineWidth=1;drawRuler(c,W);updSB();}
+
+function drawRuler(c,W){var td=P.totalDurationMs||1,v=td/zoom,y0=CONFIG.BANDS.rule[0],y1=CONFIG.BANDS.rule[1],tt,x,day=isDay();
+c.textBaseline='top';
+var minor=day?'rgba(16,24,40,.35)':'rgba(136,136,168,.65)';
+var major=day?'rgba(16,24,40,.65)':'rgba(136,136,168,.95)';
+var txtCol=day?'#334155':'#999';
+for(tt=Math.floor(scrollMs/1000)*1000;tt<scrollMs+v;tt+=1000){x=t2x(tt);if(x<0||x>W)continue;
+c.strokeStyle=minor;c.lineWidth=1.5;c.beginPath();c.moveTo(x,y1-12);c.lineTo(x,y1-2);c.stroke();}
+var maj=v>120000?10000:5000;
+for(tt=Math.floor(scrollMs/maj)*maj;tt<scrollMs+v;tt+=maj){x=t2x(tt);if(x<0||x>W)continue;
+c.strokeStyle=major;c.lineWidth=2;c.beginPath();c.moveTo(x,y1-17);c.lineTo(x,y1-2);c.stroke();
+c.fillStyle=txtCol;c.font='10px monospace';c.fillText(msToTime(tt).slice(0,5),x+3,y0+2);}}
+
+function drawWF(c,W,yS,h){var d=audioBuffer.getChannelData(0),td=P.totalDurationMs||1,v=td/zoom;
+var s0=Math.floor(scrollMs/td*d.length),s1=Math.min(d.length,Math.floor((scrollMs+v)/td*d.length));
+var spp=Math.max(1,Math.floor((s1-s0)/W));c.fillStyle=isDay()?'rgba(8,145,178,.35)':'rgba(0,229,255,.3)';
+for(var x=0;x<W;x++){var st=s0+x*spp,en=Math.min(st+spp,s1),mn=1,mx=-1,step=Math.max(1,Math.floor(spp/50));
+for(var i=st;i<en;i+=step){if(d[i]<mn)mn=d[i];if(d[i]>mx)mx=d[i];}
+c.fillRect(x,yS+(1-mx)*h/2,1,Math.max(1,(1-mn)*h/2-(1-mx)*h/2));}}
+
+function drawPH(ms){var ov=$('tlOv');if(!ov)return;var c=ov.getContext('2d'),W=cW(),H=CONFIG.CANVAS_H;c.clearRect(0,0,W,H);
+var day=isDay();
+var x=t2x(ms);if(x>=0&&x<=W){c.strokeStyle=day?'#c2185b':'#ff2e88';c.lineWidth=2;c.beginPath();c.moveTo(x,0);c.lineTo(x,H);c.stroke();}
+['line','sec'].forEach(function(k){if(mark[k]==='start'){var mx=t2x(markStart[k]);if(mx>=0&&mx<=W){
+c.strokeStyle=day?'#15803d':'#39ff8e';c.setLineDash([4,4]);c.beginPath();c.moveTo(mx,0);c.lineTo(mx,H);c.stroke();c.setLineDash([]);}}});
+if(drag.on&&drag.t0!=null){var dx=t2x(drag.t0);if(dx>=0&&dx<=W){c.strokeStyle=day?'#b45309':'#ffb454';c.setLineDash([2,2]);
+c.beginPath();c.moveTo(dx,0);c.lineTo(dx,H);c.stroke();c.setLineDash([]);
+c.font='10px monospace';c.textBaseline='top';var lbl=msToTime(drag.t0),wT=c.measureText(lbl).width;
+c.fillStyle=day?'rgba(255,255,255,.9)':'rgba(10,10,18,.85)';c.fillRect(dx+3,4,wT+6,14);c.fillStyle=day?'#b45309':'#ffb454';c.fillText(lbl,dx+6,6);}}}
+
+function updSB(){var td=P.totalDurationMs||1,v=td/zoom,th=$('tlThumb'),bar=$('tlSb');if(!th||!bar)return;var bw=bar.clientWidth||1;
+var tw=Math.max(24,v/td*bw);th.style.width=tw+'px';th.style.left=Math.min(scrollMs/td*bw,bw-tw)+'px';th.style.display=zoom<=1?'none':'block';}
+
+function hitAt(x,y){var B=CONFIG.BANDS,E=CONFIG.EDGE_PX,i,s,l,x1,x2;
+if(y>=B.sec[0]&&y<=B.sec[1]){for(i=0;i<P.sections.length;i++){s=P.sections[i];x1=t2x(s.startMs);x2=t2x(s.endMs);
+if(Math.abs(x-x1)<E)return{t:'secR',i:i,e:'l'};if(Math.abs(x-x2)<E)return{t:'secR',i:i,e:'r'};if(x>x1+E&&x<x2-E)return{t:'secM',i:i};}return{t:'seek'};}
+if(y>=B.line[0]&&y<=B.line[1]){for(i=P.lines.length-1;i>=0;i--){l=P.lines[i];x1=t2x(l.startMs);x2=t2x(l.endMs);
+if(Math.abs(x-x1)<E)return{t:'lineR',i:i,e:'l'};if(Math.abs(x-x2)<E)return{t:'lineR',i:i,e:'r'};if(x>=x1&&x<=x2)return{t:'lineM',i:i};}return{t:'seek'};}
+return{t:'seek'};}
+
+function initTL(){var w=$('tlWrap');if(!w)return;
+w.addEventListener('pointerdown',function(e){if(e.button!==undefined&&e.button!==0)return;
+var r=w.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,ms=x2t(x),h=hitAt(x,y);
+drag={on:false,type:null,idx:-1,edge:null,x0:e.clientX,y0:e.clientY,t0:null,oS:0,oE:0,snap:snapState(),pending:h,pendMs:ms};
+if(h.t==='secR'||h.t==='secM'){drag.idx=h.i;drag.edge=h.e||null;drag.type=h.t;drag.oS=P.sections[h.i].startMs;drag.oE=P.sections[h.i].endMs;}
+else if(h.t==='lineR'||h.t==='lineM'){drag.idx=h.i;drag.edge=h.e||null;drag.type=h.t;drag.oS=P.lines[h.i].startMs;drag.oE=P.lines[h.i].endMs;}
+else{drag.type='scrub';}
+try{w.setPointerCapture(e.pointerId);}catch(err){}});
+w.addEventListener('pointermove',function(e){if(!drag.pending)return;
+var r=w.getBoundingClientRect(),x=e.clientX-r.left,dx=e.clientX-drag.x0,dy=e.clientY-drag.y0;
+if(!drag.on){if(Math.abs(dx)>CONFIG.DRAG_TH_PX&&Math.abs(dx)>Math.abs(dy))drag.on=true;else return;}
+var ms=x2t(x);
+if(drag.type==='scrub'){drag.t0=ms;seekTo(ms);drawPH(ms);return;}
+if(drag.type==='secR'){var sm=snapMs(ms,{sec:drag.idx});drag.t0=sm;var s=P.sections[drag.idx];
+if(drag.edge==='l')s.startMs=Math.min(sm,s.endMs-50);else s.endMs=Math.max(sm,s.startMs+50);}
+else if(drag.type==='lineR'){var sm2=snapMs(ms,{line:drag.idx});drag.t0=sm2;var l=P.lines[drag.idx];
+if(drag.edge==='l')l.startMs=Math.min(sm2,l.endMs-50);else l.endMs=Math.max(sm2,l.startMs+50);}
+else if(drag.type==='secM'){var at=x2t(drag.x0-r.left),ns=Math.max(0,drag.oS+(ms-at));ns=snapMs(ns,{sec:drag.idx});
+var s2=P.sections[drag.idx],du=drag.oE-drag.oS;s2.startMs=ns;s2.endMs=ns+du;drag.t0=ms;}
+else if(drag.type==='lineM'){var at2=x2t(drag.x0-r.left),ns2=Math.max(0,drag.oS+(ms-at2));ns2=snapMs(ns2,{line:drag.idx});
+var l2=P.lines[drag.idx],du2=drag.oE-drag.oS;l2.startMs=ns2;l2.endMs=ns2+du2;drag.t0=ms;}
+drawTL();drawPH(curMs());});
+function up(){if(!drag.pending)return;var wasOn=drag.on,sn2=drag.snap,type=drag.type,pendMs=drag.pendMs,idx=drag.idx;
+drag={on:false,type:null,idx:-1,edge:null,x0:0,y0:0,t0:null,oS:0,oE:0,snap:null,pending:null,pendMs:0};
+if(!wasOn){
+if(type==='lineM'||type==='secM'){var now=performance.now();
+if(lastTap.t===type&&lastTap.idx===idx&&now-lastTap.at<CONFIG.DBLTAP_MS){lastTap={t:null,idx:-1,at:0};
+if(type==='lineM')openLineModal(idx);else editSec(idx);
+drawTL();drawPH(curMs());return;}
+lastTap={t:type,idx:idx,at:now};}
+else if(type==='scrub')seekTo(pendMs);}
+if(wasOn&&type!=='scrub'){pushUndoSnap(sn2,'drag');renderStatus();renderSections();renderLines();autosave();}
+drawTL();drawPH(curMs());}
+w.addEventListener('pointerup',up);w.addEventListener('pointercancel',up);
+w.addEventListener('wheel',function(e){e.preventDefault();
+var r=w.getBoundingClientRect(),mx=e.clientX-r.left,mt=x2t(mx);
+zoom+=(e.deltaY>0?-CONFIG.ZOOM_STEP:CONFIG.ZOOM_STEP);
+zoom=Math.max(1,Math.min(50,zoom));
+$('zoomSlider').value=zoom;$('zoomLbl').textContent=zoom.toFixed(1)+'x';
+var td=P.totalDurationMs||1,v=td/zoom;scrollMs=mt-(mx/cW())*v;clampScroll();drawTL();drawPH(curMs());},{passive:false});
+$('zoomSlider').addEventListener('input',function(e){zoom=+e.target.value;$('zoomLbl').textContent=zoom.toFixed(1)+'x';
+var td=P.totalDurationMs||1,center=scrollMs+td/(zoom||1)/2;scrollMs=center-td/zoom/2;clampScroll();drawTL();drawPH(curMs());});
+var bar=$('tlSb');
+function sbSeek(ev){
+var r=bar.getBoundingClientRect();
+var ratio=(ev.clientX-r.left)/r.width;
+ratio=Math.max(0,Math.min(1,ratio));
+var td=P.totalDurationMs||1,v=td/zoom;
+scrollMs=Math.max(0,Math.min(ratio*td-v/2,td-v));
+drawTL();drawPH(curMs());
+}
+function sbStart(ev){
+if(bar.__drag)return;
+ev.preventDefault();ev.stopPropagation();
+bar.__drag=true;
+sbSeek(ev);
+function mv(e2){if(!bar.__drag)return;sbSeek(e2);}
+function up2(){bar.__drag=false;removeEventListener('pointermove',mv);removeEventListener('pointerup',up2);removeEventListener('pointercancel',up2);}
+addEventListener('pointermove',mv,false);
+addEventListener('pointerup',up2,false);
+addEventListener('pointercancel',up2,false);
+}
+bar.addEventListener('pointerdown',sbStart);}
+
+function handleMark(kind){var c=curMs();
+if(mark[kind]==='idle'){mark[kind]='start';markStart[kind]=c;toast(t('toast.markS')+' '+msToTime(c));drawPH(c);return;}
+if(c<=markStart[kind]){mark[kind]='idle';toast(t('toast.endStart'),'warn');drawPH(curMs());return;}
+var s0=markStart[kind];mark[kind]='idle';
+if(kind==='sec'){pendSec={s0:s0,e0:c};smInst=false;$('smInstC').classList.remove('on');$('smName').value='';$('smInter').value='';
+editSecIdx=-1;$('smTitle').textContent=t('mk.newTitle');$('smTimes').style.display='none';
+$('smRange').textContent=msToTime(s0)+' → '+msToTime(c);$('secModal').classList.add('show');setTimeout(function(){$('smName').focus();},60);drawPH(curMs());return;}
+if(!P.sections.length){toast(t('toast.noSec'),'warn');drawPH(curMs());return;}
+pushUndo('mark line');
+var si=-1;P.sections.forEach(function(s,i){if(s0>=s.startMs&&s0<s.endMs)si=i;});
+var idx=si>=0?si:P.sections.length-1;
+P.lines.push({id:P.nextLineId++,sectionId:P.sections[idx].id,text:'',interpreter:null,startMs:s0,endMs:c,energy:null});
+renderLines();renderStatus();autosave();toast(t('toast.markE'));drawPH(curMs());}
+
+function editSec(i){editSecIdx=i;var s=P.sections[i];
+$('smTitle').textContent=t('mk.editTitle');$('smTimes').style.display='';
+$('smRange').textContent='ID '+s.id;
+$('smName').value=s.name||'';$('smInter').value=s.interpreter||'';
+smInst=!!s.instrumental;$('smInstC').classList.toggle('on',smInst);
+$('smStart').value=msToTime(s.startMs);$('smEnd').value=msToTime(s.endMs);
+$('secModal').classList.add('show');setTimeout(function(){$('smName').focus();},60);}
+function secSave(){var n=$('smName').value.trim();if(!n){toast(t('toast.noSec'),'warn');return;}
+if(editSecIdx>=0){var s3=P.sections[editSecIdx];
+pushUndo('edit sec');
+s3.name=n;s3.interpreter=$('smInter').value.trim()||null;s3.instrumental=smInst;
+var a3=timeToMs($('smStart').value),b3=timeToMs($('smEnd').value);
+if(b3>a3){s3.startMs=a3;s3.endMs=b3;}else{toast(t('toast.endStart'),'warn');}
+P.sections.sort(function(x,y){return x.startMs-y.startMs;});
+closeSec();renderAll();autosave();toast(t('toast.secSave'));return;}
+pushUndo('mark sec');
+P.sections.push({id:P.nextSecId++,name:n,interpreter:$('smInter').value.trim()||null,instrumental:smInst,startMs:pendSec.s0,endMs:pendSec.e0});
+P.sections.sort(function(a,b){return a.startMs-b.startMs;});closeSec();renderSections();renderLines();renderStatus();autosave();}
+function closeSec(){$('secModal').classList.remove('show');pendSec=null;editSecIdx=-1;}
+function openLineModal(i){if(!P.lines[i])return;editLineIdx=i;lmSnap=snapState();var l=P.lines[i];
+$('lmRange').textContent=msToTime(l.startMs)+' → '+msToTime(l.endMs);
+$('lmText').value=l.text||'';$('lmInter').value=l.interpreter||'';lmPaintE();
+$('lineModal').classList.add('show');setTimeout(function(){$('lmText').focus();},60);}
+function lmPaintE(){var l=P.lines[editLineIdx];if(!l)return;var b=$('lmEnergy');var e=l.energy||0;
+b.innerHTML='<span class="edot" style="background:'+encol(e)+'"></span>E'+e;b.title=t('e'+e);}
+function lmCycleE(){var l=P.lines[editLineIdx];if(!l)return;l.energy=((l.energy||0)+1)%4;lmPaintE();}
+function lmJump(){var i=editLineIdx;closeLineModal();focusLine(i);}
+function lmSave(next){var l=P.lines[editLineIdx];if(!l)return;
+l.text=$('lmText').value;l.interpreter=$('lmInter').value.trim()||null;
+if(lmSnap)pushUndoSnap(lmSnap,'line edit');lmSnap=null;
+renderLines();autosave();toast(t('toast.lnSave'));
+if(next){var order=P.lines.slice().sort(function(a,b){return a.startMs-b.startMs;});
+var pos=order.indexOf(l);var nx=order[pos+1];closeLineModal();
+if(nx)openLineModal(P.lines.indexOf(nx));else toast('🏁');}
+else closeLineModal();}
+function closeLineModal(){$('lineModal').classList.remove('show');editLineIdx=-1;lmSnap=null;}
+
+function tapTempo(){var now=performance.now();if(taps.length&&now-taps[taps.length-1]>2500)taps=[];taps.push(now);
+$('tapHint').textContent=t('toast.tap')+' '+taps.length;if(taps.length<6)return;
+var iv=[],i;for(i=1;i<taps.length;i++)iv.push(taps[i]-taps[i-1]);iv.sort(function(a,b){return a-b;});
+var med=iv[Math.floor(iv.length/2)];
+P.bpm=Math.round(60000/med*10)/10;P.offsetMs=Math.round(((taps[0]%med)+med)%med);taps=[];$('tapHint').textContent='';
+writeCfg();renderAll();autosave();toast(t('toast.tapOk')+': '+P.bpm);}
+
+function openPaste(){$('pasteModal').classList.add('show');}
+function closePaste(){$('pasteModal').classList.remove('show');}
+function doPaste(){if(!P.bpm||!P.barsPerLine){toast(t('toast.need')+'BPM + '+t('cfg.bpl'),'warn');return;}
+pushUndo('paste');
+var txt=$('pasteArea').value.split(/\r?\n/),cur=null,created=[];
+var cursor=P.sections.length?Math.max.apply(null,P.sections.map(function(s){return s.endMs;})):0;
+var lineDur=P.barsPerLine*barMs();
+txt.forEach(function(raw){var l=raw.trim();if(!l)return;
+var hm=l.match(/^\[(.+)\]$/);
+if(hm){var parts=hm[1].split('|').map(function(x){return x.trim();});
+var interp=(parts[1]&&parts[1]!=='instrumental')?parts[1]:null;
+cur={id:P.nextSecId++,name:parts[0],interpreter:interp,instrumental:parts[1]==='instrumental',startMs:cursor,endMs:cursor};
+P.sections.push(cur);created.push(cur);return;}
+if(!cur){cur={id:P.nextSecId++,name:L('Sección','Section')+' '+P.nextSecId,interpreter:null,instrumental:false,startMs:cursor,endMs:cursor};P.sections.push(cur);created.push(cur);}
+P.lines.push({id:P.nextLineId++,sectionId:cur.id,text:l,interpreter:null,startMs:cursor,endMs:cursor+lineDur,energy:autoEnergy(l)});
+cursor+=lineDur;cur.endMs=cursor;});
+created.forEach(function(s,idx){if(s.endMs===s.startMs&&s.instrumental){var nx=created[idx+1];s.endMs=nx?nx.startMs:cursor;}});
+P.sections=P.sections.filter(function(s){return s.endMs>s.startMs;});
+P.sections.sort(function(a,b){return a.startMs-b.startMs;});
+closePaste();$('pasteArea').value='';renderSections();renderLines();renderStatus();autosave();toast(t('toast.paste'));}
+function reflow(){if(!P.bpm||!P.barsPerLine){toast(t('toast.need')+'BPM + '+t('cfg.bpl'),'warn');return;}
+pushUndo('reflow');var lineDur=P.barsPerLine*barMs();
+P.sections.forEach(function(sec){var ls=P.lines.filter(function(l){return l.sectionId===sec.id;}).sort(function(a,b){return a.startMs-b.startMs;});
+if(!ls.length)return;var cur=sec.startMs;ls.forEach(function(l){l.startMs=cur;l.endMs=cur+lineDur;cur+=lineDur;});sec.endMs=cur;});
+renderSections();renderLines();renderStatus();autosave();toast(t('toast.reflow'));}
+function autoEnergy(tx){if(/[!?¡¿]/.test(tx))return 3;if(tx.length>42)return 2;if(tx.length<=20)return 1;return 2;}
+function autoEnergyAll(){pushUndo('auto-energy');P.lines.forEach(function(l){l.energy=autoEnergy(l.text||'');});renderLines();autosave();toast('🪄');}
+function cycleE(i){var s2=snapState();P.lines[i].energy=((P.lines[i].energy||0)+1)%4;pushUndoSnap(s2,'energy');renderLines();autosave();}
+function updLine(i,k,v){var s2=snapState();P.lines[i][k]=v||null;pushUndoSnap(s2,'line edit');renderLines();autosave();}
+function rmLine(i){pushUndo('rm line');P.lines.splice(i,1);renderLines();renderStatus();autosave();}
+function rmSec(i){pushUndo('rm sec');var id=P.sections[i].id;P.sections.splice(i,1);P.lines=P.lines.filter(function(l){return l.sectionId!==id;});
+renderSections();renderLines();renderStatus();autosave();}
+function focusLine(i){var l=P.lines[i];activateTab('tl');var td=P.totalDurationMs||1;zoom=Math.max(zoom,8);
+$('zoomSlider').value=zoom;$('zoomLbl').textContent=zoom.toFixed(1)+'x';scrollMs=l.startMs-(td/zoom)/2;clampScroll();drawTL();seekTo(l.startMs);}
+function lyricsTXT(){readCfg();var A=['#LYRICS_BRIDGE v1','TITLE='+(P.projectName||''),'BPM='+(P.bpm||''),'OFFSET_MS='+(P.offsetMs||0),'BARS_PER_LINE='+(P.barsPerLine||''),'FPS='+(P.fps||'')];
+P.sections.forEach(function(s){A.push('');A.push('[SECTION] '+s.name+(s.interpreter?' | interpreter='+s.interpreter:'')+(s.instrumental?' | instrumental':'')+' | start='+msToTime(s.startMs)+' | end='+msToTime(s.endMs));
+P.lines.filter(function(l){return l.sectionId===s.id;}).sort(function(a,b){return a.startMs-b.startMs;}).forEach(function(l){
+A.push(msToTime(l.startMs)+' -> '+msToTime(l.endMs)+(l.energy?' | e='+l.energy:'')+(l.interpreter?' | i='+l.interpreter:'')+' | '+l.text);});});
+return A.join('\n');}
+function parseLyricsTXT(tx){var meta={},sections=[],cur=null;
+tx.split(/\r?\n/).forEach(function(raw){var l=raw.trim();if(!l)return;
+if(l.indexOf('#LYRICS_BRIDGE')===0)return;
+var hm=l.match(/^([A-Z_]+)=(.*)$/);if(hm&&l.indexOf('[SECTION]')!==0){meta[hm[1]]=hm[2];return;}
+var sm=l.match(/^\[SECTION\]\s*(.+)$/);
+if(sm){var parts=sm[1].split('|').map(function(x){return x.trim();});
+var s={name:parts[0],interpreter:null,instrumental:false,startMs:0,endMs:0,lines:[]};
+parts.slice(1).forEach(function(p){if(p.indexOf('interpreter=')===0)s.interpreter=p.slice(12)||null;
+else if(p==='instrumental')s.instrumental=true;
+else if(p.indexOf('start=')===0)s.startMs=timeToMs(p.slice(6));
+else if(p.indexOf('end=')===0)s.endMs=timeToMs(p.slice(4));});
+cur=s;sections.push(s);return;}
+var lm=l.match(/^(\d{2}:\d{2}:\d{3})\s*->\s*(\d{2}:\d{2}:\d{3})\s*(.*)$/);
+if(lm){if(!cur){cur={name:'?',interpreter:null,instrumental:false,startMs:0,endMs:0,lines:[]};sections.push(cur);}
+var e=null,ip=null,txt=[];
+lm[3].split('|').map(function(x){return x.trim();}).forEach(function(p){if(p.indexOf('e=')===0)e=+p.slice(2)||null;else if(p.indexOf('i=')===0)ip=p.slice(2)||null;else txt.push(p);});
+var s0=timeToMs(lm[1]),s1=timeToMs(lm[2]);
+cur.lines.push({text:txt.join(' | '),energy:e,interpreter:ip,startMs:s0,endMs:s1});
+if(!cur.startMs&&!cur.endMs){cur.startMs=s0;cur.endMs=s1;}else{cur.startMs=Math.min(cur.startMs,s0);cur.endMs=Math.max(cur.endMs,s1);}}});
+return{meta:meta,sections:sections};}
+function importLyrics(tx){var parsed=parseLyricsTXT(tx);if(!parsed.sections.length){toast('⚠','err');return;}
+var replace=P.lines.length?confirm(L('¿REEMPLAZAR contenido actual? OK=reemplazar, Cancelar=fusionar.','REPLACE current content? OK=replace, Cancel=merge.')):true;
+pushUndo('import');
+function build(ns,nl){var secs=[],lns=[];
+parsed.sections.forEach(function(s){var sid=ns++;secs.push({id:sid,name:s.name,interpreter:s.interpreter,instrumental:s.instrumental,startMs:s.startMs,endMs:s.endMs});
+s.lines.forEach(function(l){lns.push({id:nl++,sectionId:sid,text:l.text,interpreter:l.interpreter,startMs:l.startMs,endMs:l.endMs,energy:l.energy});});});
+return{secs:secs,lns:lns,ns:ns,nl:nl};}
+if(replace){var b=build(1,1);P.sections=b.secs;P.lines=b.lns;P.nextSecId=b.ns;P.nextLineId=b.nl;toast(t('toast.importRep'));}
+else{var b2=build(P.nextSecId,P.nextLineId);P.sections=P.sections.concat(b2.secs);P.lines=P.lines.concat(b2.lns);P.nextSecId=b2.ns;P.nextLineId=b2.nl;
+P.sections.sort(function(a,x){return a.startMs-x.startMs;});toast(t('toast.importMerge'));}
+if(parsed.meta.BPM)P.bpm=+parsed.meta.BPM||P.bpm;
+if(parsed.meta.OFFSET_MS!=null&&parsed.meta.OFFSET_MS!=='')P.offsetMs=+parsed.meta.OFFSET_MS||0;
+if(parsed.meta.BARS_PER_LINE)P.barsPerLine=+parsed.meta.BARS_PER_LINE||P.barsPerLine;
+if(parsed.meta.FPS)P.fps=+parsed.meta.FPS||P.fps;
+if(parsed.meta.TITLE)P.projectName=parsed.meta.TITLE;
+writeCfg();renderAll();autosave();}
+
+function readCfg(){P.projectName=$('projectName').value;P.bpm=parseFloat($('bpm').value)||null;
+P.offsetMs=$('offsetMs').value===''?null:(parseInt($('offsetMs').value)||0);P.fps=parseInt($('fps').value)||null;
+P.targetDur=parseFloat($('targetDur').value)||null;P.overlapSec=parseFloat($('overlapSec').value)||null;
+P.barsPerLine=$('barsPerLine').value?+$('barsPerLine').value:null;P.res=$('techRes').value;
+P.customW=parseInt($('customW').value)||null;P.customH=parseInt($('customH').value)||null;
+P.snapTh=$('snapTh').value===''?null:(parseInt($('snapTh').value)||null);
+P.bible=$('bible').value;P.mpLang=$('mpLang').value;
+P.mpMin=$('tcMinJSON').classList.contains('on');P.mpTables=$('tcTables').classList.contains('on');
+var td=timeToMs($('totalDuration').value);if(td>0)P.totalDurationMs=td;}
+function writeCfg(){$('projectName').value=P.projectName||'';$('bpm').value=P.bpm!=null?P.bpm:'';
+$('offsetMs').value=P.offsetMs!=null?P.offsetMs:'';$('fps').value=P.fps!=null?P.fps:'';
+$('targetDur').value=P.targetDur!=null?P.targetDur:'';$('overlapSec').value=P.overlapSec!=null?P.overlapSec:'';
+$('barsPerLine').value=P.barsPerLine||'';$('techRes').value=P.res||'';
+$('customResF').style.display=P.res==='custom'?'':'none';
+$('customW').value=P.customW||'';$('customH').value=P.customH||'';$('snapTh').value=P.snapTh!=null?P.snapTh:'';
+$('bible').value=P.bible||'';$('mpLang').value=P.mpLang||LANG;
+$('tcMinJSON').classList.toggle('on',P.mpMin!==false);$('tcTables').classList.toggle('on',P.mpTables!==false);
+$('totalDuration').value=P.totalDurationMs?msToTime(P.totalDurationMs):'';$('tlTot').textContent=msToTime(P.totalDurationMs);
+$('tcFLF').classList.toggle('on',!!P.flf);
+['edges','beat','bar','phrase'].forEach(function(k){var m={edges:'snE',beat:'snB',bar:'snBar',phrase:'snPh'};$(m[k]).classList.toggle('on',!!P.snap[k]);});}
+function tgFlf(){P.flf=!P.flf;$('tcFLF').classList.toggle('on',P.flf);autosave();}
+function tgMpOpt(k){if(k==='min')P.mpMin=!P.mpMin;else P.mpTables=!P.mpTables;
+$('tcMinJSON').classList.toggle('on',P.mpMin);$('tcTables').classList.toggle('on',P.mpTables);updateMpSize();autosave();}
+
+function skeleton(){readCfg();var clips=computeClips(),beat=beatMs(),ev=[],tt,i;
+if(beat){for(tt=offMs(),i=1;tt<=(P.totalDurationMs||0);tt+=beat,i++)ev.push({timeMs:Math.round(tt),index:i});}
+var table=lineClipTable();
+var notepad='[CONTEXTO PARA IA — LEER ANTES DE PROCESAR]\nGenerado por Puente Lírico v1 · MODO DIRECTOR NARRATIVO. Los clips de este esqueleto son partición de REFERENCIA (techo='+(P.targetDur||'?')+'s); la IA debe reautorizar scenes[], assignments[] y clips[] con duraciones variables, cobertura total y arco dramático. En la Calculadora, tras importar el guion final, NO pulses Generar/Actualizar: se remapearía el guion. Tabla línea×clip de referencia:\n'+
+table.map(function(r){return 'CLIP '+String(r.clip).padStart(2,'0')+' ['+msToTime(r.range[0])+'→'+msToTime(r.range[1])+'] líneas: '+(r.lines.length?r.lines.map(function(h){return h.n+'('+h.pct+'%)';}).join(', '):'—');}).join('\n');
+var tc={fps:P.fps||24,cfgScale:6,steps:25,includeCfg:false,includeSteps:false,customW:1920,customH:1080};
+if(P.res)tc.res=(P.res==='custom'?'custom':P.res);
+if(P.res==='custom'){tc.customW=P.customW;tc.customH=P.customH;}
+return{version:'1.0',state:{projectName:P.projectName||'Proyecto',bpm:P.bpm,events:ev,
+sections:P.sections.map(function(s){return{name:s.name,description:(s.interpreter?(L('Intérprete','Interpreter')+': '+s.interpreter+'. '):'')+(s.instrumental?L('Instrumental.','Instrumental.'):''),startMs:s.startMs,endMs:s.endMs,aestheticIdx:null,config:{}};}),
+scenes:[],assignments:[],
+clips:clips.map(function(c){return{id:c.id,sectionIdx:c.sectionIdx,sceneId:null,asnIdx:null,manual:false,startMs:c.startMs,endMs:c.endMs,genStartMs:c.startMs,genEndMs:c.endMs,coreStartMs:c.startMs+c.S/2,coreEndMs:c.endMs-c.S/2,coreDurMs:c.coreDurMs,genDurMs:c.genDurMs,S:c.S,frames:c.frames,D:c.D,firstLastFrame:false,firstFrameFrom:null};}),
+clipDescriptions:{},clipAesthetics:{},notepad:notepad,universalPrompt:'',universalPromptTitle:'',aesthetics:[],
+techConfig:tc,globalConfig:{targetDuration:P.targetDur||8,overlapSec:P.overlapSec||0,snapToBeat:false,snapThreshold:P.snapTh||500,firstLastFrame:!!P.flf,minClipDur:3,minClipOn:false},
+totalDurationMs:P.totalDurationMs,audioFileName:P.audioFileName||''}};}
+
+var BK=String.fromCharCode(96),F3=BK+BK+BK;
+function masterPrompt(){readCfg();var es=(P.mpLang||LANG)==='es',sk=skeleton(),table=lineClipTable(),A=[],NREF=sk.state.clips.length;
+var TD=P.totalDurationMs||0,CEIL=(P.targetDur||8)*1000,FPS=P.fps||24;
+function bi(a,b){A.push(es?a:b);}
+bi('# ROL Y META — MODO DIRECTOR NARRATIVO','# ROLE & GOAL — NARRATIVE DIRECTOR MODE');
+bi('Eres director cinematográfico y guionista para "Beat Calculator for AI Video" (By Seny Clever v1). Recibes un ESQUELETO JSON con la capa musical ya fijada. NO te limites a rellenar descripciones: debes REAUTORIZAR la capa narrativa (scenes, assignments, clips, aesthetics, prompts y notepad) para construir un cortometraje musical con conflicto, arco de personajes y clímax. Devuelve UN SOLO bloque JSON válido con el proyecto COMPLETO.','You are a cinematic director and screenwriter for "Beat Calculator for AI Video" (By Seny Clever v1). You receive a JSON SKELETON with the musical layer already fixed. Do not just fill descriptions: you must RE-AUTHOR the narrative layer (scenes, assignments, clips, aesthetics, prompts and notepad) to build a musical short film with conflict, character arcs and climax. Return ONE single valid JSON block with the COMPLETE project.');
+bi('# MANIFIESTO DE ENTRADA','# INPUT MANIFEST');
+A.push((es?'Proyecto: ':'Project: ')+(P.projectName||'—')+' | audio: '+(P.audioFileName||'—'));
+A.push('BPM='+(P.bpm||'—')+' OFFSET_MS='+(P.offsetMs||0)+' | beat='+(beatMs()?Math.round(beatMs()):'—')+'ms bar='+(barMs()?Math.round(barMs()):'—')+'ms phrase='+(phraseMs()?Math.round(phraseMs()):'—')+'ms');
+A.push((es?'Duración total: ':'Total: ')+msToTime(TD)+' | FPS='+FPS+' | '+(es?'techo/clip: ':'ceiling/clip: ')+(P.targetDur||'—')+'s | res='+(P.res||'—'));
+if(P.mpTables){
+bi('# SECCIONES (estructura musical; tiempos inmutables)','# SECTIONS (musical structure; timings immutable)');
+P.sections.forEach(function(s,i){A.push((i+1)+'. '+s.name+' ['+msToTime(s.startMs)+'→'+msToTime(s.endMs)+']'+(s.interpreter?' int='+s.interpreter:'')+(s.instrumental?' INSTRUMENTAL':''));});
+bi('# LÍNEAS DE LETRA (verbatim, NO traducir)','# LYRIC LINES (verbatim, do NOT translate)');
+P.lines.forEach(function(l,i){var sec=null;P.sections.forEach(function(s){if(s.id===l.sectionId)sec=s;});
+A.push('L'+String(i+1).padStart(2,'0')+' ['+msToTime(l.startMs)+'→'+msToTime(l.endMs)+'] sec='+(sec?sec.name:'?')+(l.interpreter?' int='+l.interpreter:'')+' E'+(l.energy||0)+' :: '+l.text);});
+bi('# TABLA CLIP×LÍNEA DE REFERENCIA (sincronía; la partición final la defines TÚ)','# REFERENCE CLIP×LINE TABLE (sync; YOU define the final partition)');
+table.forEach(function(r){A.push('CLIP '+String(r.clip).padStart(2,'0')+' ['+msToTime(r.range[0])+'→'+msToTime(r.range[1])+'] '+r.frames+'f :: '+(r.lines.length?r.lines.map(function(h){return 'L'+String(h.n).padStart(2,'0')+'('+h.pct+'%)';}).join(', '):'—'));});}
+bi('# MAPEO DE ENERGÍA (tensión narrativa + intensidad de cámara)','# ENERGY MAPPING (narrative tension + camera intensity)');
+bi('E0 neutra=observación estable · E1 baja=push lento, misterio · E2 media=tracking/dolly, avance dramático · E3 alta=grúa/revelación, contraste fuerte. La energía marca el pulso dramático, no solo el movimiento.','E0 neutral=stable observation · E1 low=slow push, mystery · E2 mid=tracking/dolly, dramatic advance · E3 high=crane/revelation, strong contrast. Energy marks the dramatic pulse, not only movement.');
+if(P.bible&&P.bible.trim()){bi('# BIBLIA / NOTAS DEL DIRECTOR (PRIORIDAD MÁXIMA)','# BIBLE / DIRECTOR NOTES (HIGHEST PRIORITY)');A.push(P.bible.trim());}
+bi('# ESQUELETO JSON BASE (capa musical inmutable; capa narrativa reautorizable)','# BASE JSON SKELETON (musical layer immutable; narrative layer re-authorable)');
+A.push(F3+'json');A.push(P.mpMin?JSON.stringify(sk):JSON.stringify(sk,null,1));A.push(F3);
+bi('# CONTRATO DE CAPAS','# LAYER CONTRACT');
+bi('INMUTABLE: version, state.projectName, state.bpm, state.events, state.sections[].name/startMs/endMs, state.totalDurationMs, state.audioFileName, state.techConfig, state.globalConfig.','IMMUTABLE: version, state.projectName, state.bpm, state.events, state.sections[].name/startMs/endMs, state.totalDurationMs, state.audioFileName, state.techConfig, state.globalConfig.');
+bi('REAUTORIZABLE: scenes[], assignments[], clips[], clipDescriptions{}, clipAesthetics{}, aesthetics[], universalPrompt, universalPromptTitle, notepad (AÑADIR sin borrar tabla ni advertencia), sections[].description/aestheticIdx. Los clips del esqueleto son partición de REFERENCIA: debes SUSTITUIRLOS por una partición narrativa.','RE-AUTHORABLE: scenes[], assignments[], clips[], clipDescriptions{}, clipAesthetics{}, aesthetics[], universalPrompt, universalPromptTitle, notepad (APPEND without deleting table or warning), sections[].description/aestheticIdx. Skeleton clips are a REFERENCE partition: you must REPLACE them with a narrative partition.');
+bi('# ESQUEMA EXACTO','# EXACT SCHEMA');
+bi('scenes[]: {id, name, description, aestheticIdx, config:{targetDuration:null, overlapSec:null, firstLastFrame:true|false|null, crossFLF:null}}. Una escena puede tener VARIOS clips; usa firstLastFrame=true solo cuando el último frame de la escena encadena con el primero de la siguiente.','scenes[]: {id, name, description, aestheticIdx, config:{targetDuration:null, overlapSec:null, firstLastFrame:true|false|null, crossFLF:null}}. A scene may hold SEVERAL clips; use firstLastFrame=true only when the scene last frame chains into the next scene first frame.');
+bi('assignments[]: {sceneId, sectionIdx, startMs, endMs, overrides:{}}. Contiguos y dentro de su sección. Cada clip referencia su assignment por asnIdx (índice base 0) y su escena por sceneId.','assignments[]: {sceneId, sectionIdx, startMs, endMs, overrides:{}}. Contiguous and inside their section. Each clip references its assignment by asnIdx (0-based index) and its scene by sceneId.');
+bi('clips[]: {id, sectionIdx, sceneId, asnIdx, manual:false, startMs, endMs, genStartMs=startMs, genEndMs=endMs, coreStartMs=startMs+S/2, coreEndMs=endMs-S/2, coreDurMs=(endMs-startMs)-S, genDurMs=endMs-startMs, S, frames=Math.round((endMs-startMs)/1000*FPS), D=techo_ms, firstLastFrame:false, firstFrameFrom:null}. Cola instrumental sin escena propia: sceneId:null, asnIdx:null.','clips[]: {id, sectionIdx, sceneId, asnIdx, manual:false, startMs, endMs, genStartMs=startMs, genEndMs=endMs, coreStartMs=startMs+S/2, coreEndMs=endMs-S/2, coreDurMs=(endMs-startMs)-S, genDurMs=endMs-startMs, S, frames=Math.round((endMs-startMs)/1000*FPS), D=ceiling_ms, firstLastFrame:false, firstFrameFrom:null}. Instrumental tail without its own scene: sceneId:null, asnIdx:null.');
+bi('aesthetics[]: [{name, content}] (6 a 12 MUNDOS visuales, no solo paletas). scenes[].aestheticIdx apunta al índice; clipAesthetics {"id":idx} solo para excepciones.','aesthetics[]: [{name, content}] (6 to 12 visual WORLDS, not just palettes). scenes[].aestheticIdx points to the index; clipAesthetics {"id":idx} only for exceptions.');
+bi('# REGLAS DE PARTICIÓN NARRATIVA','# NARRATIVE PARTITION RULES');
+bi('Cobertura 100% de [0, '+msToTime(TD)+']: clips consecutivos sin huecos ni solapes. Ningún clip supera D='+CEIL+'ms. ids 1..N secuenciales y ordenados por startMs. frames = round(duración/1000*'+FPS+').','100% coverage of [0, '+msToTime(TD)+']: consecutive clips with no gaps or overlaps. No clip exceeds D='+CEIL+'ms. ids 1..N sequential and sorted by startMs. frames = round(duration/1000*'+FPS+').');
+bi('Duración VARIABLE según tensión: revelaciones y golpes = clips cortos; contemplación = clips largos. Prohibido que todos los clips duren lo mismo. No dejes instrumentales sin beats narrativos.','VARIABLE duration driven by tension: reveals and hits = short clips; contemplation = long clips. All clips having the same duration is forbidden. Do not leave instrumentals without narrative beats.');
+bi('# ESTÁNDAR NARRATIVO OBLIGATORIO (ANTI-A / PRO-B)','# MANDATORY NARRATIVE STANDARD (ANTI-A / PRO-B)');
+bi('Conflicto o misterio en los primeros 15s. Protagonista con arco visible (antes/después). Fuerza de oposición y, si encaja, fuerza mayor impersonal (muerte/tiempo/cosmos) que no se derrota, solo se integra. Al menos UNA imagen ancla inolvidable en el clímax. Final con significado (agridulce recomendado). Motivos recurrentes: pregunta temprana → respuesta tardía.','Conflict or mystery within the first 15s. Protagonist with a visible arc (before/after). Opposition force and, if it fits, an impersonal greater force (death/time/cosmos) that is not defeated, only integrated. At least ONE unforgettable anchor image at the climax. Meaningful ending (bittersweet recommended). Recurring motifs: early question → late answer.');
+bi('PROHIBIDO: clips uniformes, personajes estáticos, mundos genéricos, relleno contemplativo sin conflicto, y prompts que solo dibujan la letra. No ilustres la letra: amplifícala con una historia paralela.','FORBIDDEN: uniform clips, static characters, generic worlds, contemplative filler without conflict, and prompts that only draw the lyrics. Do not illustrate lyrics: amplify them with a parallel story.');
+bi('# PROMPTS DE VIDEO (8 BLOQUES)','# VIDEO PROMPTS (8 BLOCKS)');
+bi('clipDescriptions {"id": prompt} para TODOS los clips. Plantilla: [STYLE][SUBJECT&ACTION][ENVIRONMENT][CAMERA][LIGHTING][MOTION/BPM][EXCLUSIONS inline][PARAMS]. refs CHARACTER-ONLY (nunca copiar el fondo de la referencia). Exclusiones específicas del riesgo de cada clip. Movimiento half-time del BPM, ease-in/ease-out, sin paradas bruscas ni flicker. Cámara estable y deliberada.','clipDescriptions {"id": prompt} for EVERY clip. Template: [STYLE][SUBJECT&ACTION][ENVIRONMENT][CAMERA][LIGHTING][MOTION/BPM][EXCLUSIONS inline][PARAMS]. CHARACTER-ONLY refs (never copy the reference background). Risk-specific exclusions per clip. Half-time BPM motion, ease-in/ease-out, no abrupt stops or flicker. Stable, deliberate camera.');
+bi('# NOTEPAD = BIBLIA DE PRODUCCIÓN (AÑADIR)','# NOTEPAD = PRODUCTION BIBLE (APPEND)');
+bi('Añade: taxonomía de entidades/personajes, arco de cada intérprete, mapa de motivos (aparición→resolución), mapa de refs por clip (character-only), orden de generación (3 centinelas + batches por familia), orientación real, Enhance My Prompt OFF, letterbox solo en post, mitigación de artefactos de baja resolución, continuidad FLF y colas instrumentales.','Append: entity/character taxonomy, each performer arc, motif map (appearance→resolution), per-clip reference map (character-only), generation order (3 sentinels + family batches), real orientation, Enhance My Prompt OFF, letterbox in post only, low-resolution artifact mitigation, FLF continuity and instrumental tails.');
+bi('# CHECKLIST ANTES DE EMITIR','# PRE-OUTPUT CHECKLIST');
+bi('JSON parsea · capa musical intacta · scenes/assignments/clips coherentes y NO vacíos · al menos una escena con varios clips · cobertura 100% · ningún clip > techo · frames correctos · ids secuenciales · clipDescriptions para todos los ids · sin placeholders · notepad conserva tabla+advertencia y añade biblia · hay conflicto, arco, imagen ancla y final con sentido.','JSON parses · musical layer intact · scenes/assignments/clips coherent and NOT empty · at least one scene with several clips · 100% coverage · no clip over ceiling · correct frames · sequential ids · clipDescriptions for every id · no placeholders · notepad keeps table+warning and appends bible · conflict, arc, anchor image and meaningful ending exist.');
+bi('Si el resultado parece guion A (uniforme, sin conflicto, letra ilustrada, personajes estáticos), REHACÉLO antes de entregar.','If the result looks like script A (uniform, no conflict, illustrated lyrics, static characters), REDO it before delivering.');
+bi('# CONTRATO: un único bloque JSON válido, nada más.','# CONTRACT: a single valid JSON block, nothing else.');
+return A.join('\n');}
+function updateMpSize(){var kb='—';try{kb=(new Blob([masterPrompt()]).size/1024).toFixed(1)+' KB';}catch(e){}
+var el=$('mpSize');if(el)el.textContent=L('Peso estimado: ','Estimated size: ')+kb;}
+function copyMP(){if(!canExport()){toast(t('toast.need')+missingList(),'warn');return;}cp(masterPrompt());}
+function dlMP(){if(!canExport()){toast(t('toast.need')+missingList(),'warn');return;}var tx=masterPrompt();
+var kb=new Blob([tx]).size/1024;
+if(kb>CONFIG.SPLIT_KB){var lines=tx.split('\n'),half=Math.floor(lines.length/2);
+dl(sn(P.projectName)+'_MasterPrompt_part1.txt',lines.slice(0,half).join('\n'));
+dl(sn(P.projectName)+'_MasterPrompt_part2.txt',lines.slice(half).join('\n'));toast(t('toast.big'),'warn');return;}
+dl(sn(P.projectName)+'_MasterPrompt.txt',tx);toast(t('toast.dl'));}
+function dlLyrics(){if(!P.lines.length){toast(t('toast.noLines'),'warn');return;}dl(sn(P.projectName)+'_letra.txt',lyricsTXT());toast(t('toast.dl'));}
+function dlLyricsTemplate(){readCfg();var tx=lyricsTXT();
+if(!P.sections.length){var endMs=(P.bpm&&P.barsPerLine)?Math.round(P.barsPerLine*barMs()):0;
+tx+='\n\n[SECTION] '+L('Sección','Section')+' 1 | start=00:00:000 | end='+msToTime(endMs)+'\n';}
+dl(sn(P.projectName)+'_letra.txt',tx);toast(t('toast.dl'));}
+function dlSkeleton(){if(!canExport()){toast(t('toast.need')+missingList(),'warn');return;}dl(sn(P.projectName)+'_esqueleto.json',JSON.stringify(skeleton(),null,2));toast(t('toast.dl'));}
+
+function missingList(){readCfg();var m=[];
+if(!P.bpm)m.push('BPM');if(!P.targetDur)m.push(t('cfg.target'));if(!P.fps)m.push('FPS');
+if(!P.totalDurationMs)m.push(t('cfg.dur'));if(!P.sections.length)m.push(t('lyr.sections'));
+var tl=P.lines.some(function(l){return l.endMs>l.startMs;});if(!tl)m.push(t('lyr.lines'));
+return m.join(', ');}
+function canExport(){return missingList().length===0;}
+function validate(){readCfg();var w=[],ok=[];
+if(canExport())ok.push('✅ '+L('Todo listo para exportar.','Everything ready to export.'));
+else w.push('⚠ '+t('toast.need')+missingList());
+if(P.bpm&&P.offsetMs==null)w.push('💡 '+L('Offset vacío: se asume 0.','Offset empty: assumed 0.'));
+var ls=P.lines.filter(function(l){return l.endMs>l.startMs;}).sort(function(a,b){return a.startMs-b.startMs;});
+for(var i=1;i<ls.length;i++){if(ls[i].startMs<ls[i-1].endMs-1)w.push('⚠ '+L('Solape de líneas: ','Line overlap: ')+i+'↔'+(i+1));}
+P.lines.forEach(function(l,idx){var s=null;P.sections.forEach(function(x){if(x.id===l.sectionId)s=x;});
+if(s&&(l.startMs<s.startMs-1||l.endMs>s.endMs+1))w.push('⚠ '+L('Línea fuera de sección: ','Line outside section: ')+(idx+1));});
+var td=P.totalDurationMs||0;
+if(td){var cov=P.sections.reduce(function(a,s){return a+(s.endMs-s.startMs);},0);
+ok.push('🎯 '+L('Cobertura: ','Coverage: ')+Math.min(100,Math.round(cov/td*100))+'%');}
+var cl=computeClips();ok.push('🎞 '+L('Clips: ','Clips: ')+cl.length+' | '+L('Frames: ','Frames: ')+cl.reduce(function(a,c){return a+(c.frames||0);},0));
+var vp=$('valPanel');if(vp)vp.innerHTML=ok.map(function(o){return '<div class="ok">'+o+'</div>';}).join('')+w.map(function(x){return '<div class="warn">'+x+'</div>';}).join('')||'—';
+var wn=$('warnings');if(wn)wn.innerHTML=w.filter(function(x){return x.indexOf('⚠')===0;}).map(function(x){return '<div class="warn">'+x+'</div>';}).join('');
+return w.length;}
+function runSelfTest(){var R=[],near=function(a,b){return Math.abs(a-b)<0.01;};
+var saveT=P.targetDur,saveB=P.bpm,saveO=P.offsetMs,saveS=JSON.parse(JSON.stringify(P.snap));
+try{
+P.targetDur=8;P.bpm=170;P.offsetMs=0;P.snap={edges:false,beat:false,bar:false,phrase:false};
+var r=partition(0,22604);
+R.push({ok:r.clips.length===3&&near(r.clips[0].endMs,7534.6667),msg:L('T1 partición base (3 tercios)','T1 base partition (3 thirds)')});
+P.snap.bar=true;
+r=partition(22570,45174);
+R.push({ok:r.clips.length===3&&near(r.clips[1].startMs,29647.0588)&&near(r.clips[2].startMs,37639.3333),msg:L('T2 clon snap-bar Calculadora','T2 Calculator snap-bar clone')});
+P.snap=saveS;
+var rt=parseLyricsTXT(lyricsTXT());
+var sameLines=rt.sections.reduce(function(a,s){return a+s.lines.length;},0)===P.lines.length;
+var sameSecs=rt.sections.length===P.sections.length;
+R.push({ok:sameLines&&sameSecs,msg:L('T3 round-trip .txt sin pérdida','T3 lossless .txt round-trip')});
+var ke=Object.keys(I18N.es).sort().join(','),kn=Object.keys(I18N.en).sort().join(',');
+R.push({ok:ke===kn,msg:L('T4 paridad i18n ES/EN','T4 ES/EN i18n parity')});
+var cl=computeClips();
+R.push({ok:!P.fps||cl.every(function(c){return c.frames===Math.round((c.endMs-c.startMs)/1000*P.fps);}),msg:L('T5 frames = round(dur·fps)','T5 frames = round(dur·fps)')});
+R.push({ok:canExport()===(missingList().length===0),msg:L('T6 gates de export coherentes','T6 coherent export gates')});
+}finally{P.targetDur=saveT;P.bpm=saveB;P.offsetMs=saveO;P.snap=saveS;}
+var pass=R.filter(function(x){return x.ok;}).length;
+var sp=$('stPanel');if(sp)sp.innerHTML=R.map(function(x){return(x.ok?'<div class="ok">✅ ':'<div class="warn">❌ ')+x.msg+'</div>';}).join('');
+var so=$('stOut');if(so)so.textContent=pass+'/'+R.length;
+toast(t('toast.st')+pass+'/'+R.length,pass===R.length?'ok':'warn');
+LOG('selftest',R);}
+
+function renderStatus(){var tf=computeClips().reduce(function(a,c){return a+(c.frames||0);},0);
+var el=$('statusBar');if(!el)return;
+el.innerHTML='<span>🎵 <span class="sv">'+esc(P.audioFileName||'—')+'</span> '+msToTime(P.totalDurationMs)+'</span>'+
+'<span>BPM <span class="sv">'+(P.bpm||'—')+'</span></span>'+
+'<span>📑 <span class="sv">'+P.sections.length+'</span> ✍ <span class="sv">'+P.lines.length+'</span> 🎞 <span class="sv">'+computeClips().length+'</span></span>'+
+'<span>🎯 <span class="sv">'+tf+'f</span></span>';
+syncUndoBtns();}
+function renderSections(){var el=$('secList');if(!el)return;
+el.innerHTML=P.sections.map(function(s,i){var col=seccol(i);
+var nl=P.lines.filter(function(l){return l.sectionId===s.id;}).length;
+return '<div class="sec-item" style="border-left-color:'+col+'"><b style="color:'+col+'">'+(s.instrumental?'🎼 ':'')+esc(s.name)+'</b>'+(s.interpreter?' <span class="dim">· '+esc(s.interpreter)+'</span>':'')+
+' <span style="float:right"><span style="cursor:pointer;color:var(--cyan)" onclick="editSec('+i+')">✎</span> <span style="cursor:pointer" onclick="rmSec('+i+')">✕</span></span>'+
+'<div class="meta mono dim">'+msToTime(s.startMs)+' → '+msToTime(s.endMs)+' · '+nl+' '+L('líneas','lines')+'</div></div>';}).join('')||'—';}
+function renderLines(){var el=$('lineList');if(!el)return;
+el.innerHTML=P.lines.map(function(l,i){var e=l.energy||0;
+return '<div class="line-card e'+e+'"><div class="row" style="margin:0">'+
+'<input type="text" value="'+esc(l.text)+'" onchange="updLine('+i+',\'text\',this.value)" placeholder="'+esc(L('texto de línea…','line text…'))+'" style="flex:2">'+
+'<button class="small" onclick="cycleE('+i+')" title="'+esc(t('e'+e))+'"><span class="edot" style="background:'+encol(e)+'"></span>E'+e+'</button>'+
+'<button class="small" onclick="openLineModal('+i+')">✍</button>'+
+'<button class="small" onclick="focusLine('+i+')">🎯</button>'+
+'<button class="small" onclick="rmLine('+i+')">✕</button></div>'+
+'<div class="meta">'+msToTime(l.startMs)+' → '+msToTime(l.endMs)+' ('+fmtDur(l.endMs-l.startMs)+') · '+
+'<input type="text" value="'+esc(l.interpreter||'')+'" onchange="updLine('+i+',\'interpreter\',this.value)" placeholder="'+esc(L('intérprete','interpreter'))+'" style="width:90px;display:inline-block;padding:2px 5px;font-size:10px"></div></div>';}).join('')||'—';}
+function renderGuide(){var el=$('guideBox');if(!el)return;
+el.innerHTML=GUIDE.map(function(g){return '<details class="guide"><summary>'+g.i+' '+esc(g[LANG][0])+'</summary><div>'+esc(g[LANG][1])+'</div></details>';}).join('');}
+function safe(fn){try{return fn();}catch(e){pushNotif('⚠ render: '+e.message,'err');LOG(e);}}
+function renderAll(){safe(renderStatus);safe(renderSections);safe(renderLines);safe(renderGuide);safe(validate);
+safe(function(){drawTL();drawPH(curMs());updSB();});safe(updateMpSize);}
+
+function setLang(l){LANG=l;try{localStorage.setItem('lb_lang',l);}catch(e){}applyLang();fitHeader();}
+function toggleLang(){setLang(LANG==='es'?'en':'es');toast(t('toast.lang'));}
+function applyLang(){document.documentElement.lang=LANG;
+$('btnLang').textContent=LANG==='es'?'🌐 EN':'🌐 ES';
+document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.dataset.i18n);});
+if(!$('mpLang').value)$('mpLang').value=LANG;
+var ogH=$('ogH'),ogV=$('ogV'),ogC=$('ogC');
+if(ogH)ogH.label=L('Horizontal 16:9','Landscape 16:9');
+if(ogV)ogV.label=L('Vertical 9:16','Portrait 9:16');
+if(ogC)ogC.label=L('Personalizada','Custom');
+buildTabs();renderAll();}
+function buildTabs(){var T=[['cfg','tab.cfg'],['tl','tab.tl'],['lyr','tab.lyr'],['exp','tab.exp']];
+$('tabsBar').innerHTML=T.map(function(x){return '<div class="tab'+(x[0]===curTab?' active':'')+'" data-tab="'+x[0]+'">'+t(x[1])+'</div>';}).join('');
+document.querySelectorAll('.tab').forEach(function(tb){tb.addEventListener('click',function(){activateTab(tb.dataset.tab);});});}
+function activateTab(n){curTab=n;
+document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active',x.dataset.tab===n);});
+document.querySelectorAll('.tabpane').forEach(function(x){x.classList.toggle('active',x.id==='tab-'+n);});
+if(n==='tl')setTimeout(function(){drawTL();drawPH(curMs());updSB();},40);
+if(n==='exp'){validate();renderGuide();updateMpSize();}}
+function initKB(){document.addEventListener('keydown',function(e){
+if(e.key==='Escape'){closePaste();closeSec();closeLineModal();return;}
+var tag=e.target.tagName;
+if(e.ctrlKey&&e.code==='KeyZ'){e.preventDefault();undoAction();return;}
+if(e.ctrlKey&&e.code==='KeyY'){e.preventDefault();redoAction();return;}
+if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT')return;
+if(e.code==='Space'&&curTab==='tl'){e.preventDefault();togglePlay();return;}
+if(e.code==='KeyL'){e.preventDefault();handleMark('line');return;}
+if(e.code==='KeyM'){e.preventDefault();handleMark('sec');return;}});}
+function initEv(){$('audioFile').addEventListener('change',function(e){if(e.target.files[0])loadAudio(e.target.files[0]);e.target.value='';});
+$('loadProj').addEventListener('change',function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){loadProject(ev.target.result);};r.readAsText(f);e.target.value='';});
+$('impLyrics').addEventListener('change',function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){importLyrics(ev.target.result);};r.readAsText(f);e.target.value='';});
+$('techRes').addEventListener('change',function(){$('customResF').style.display=$('techRes').value==='custom'?'':'none';readCfg();autosave();});
+['projectName','bpm','offsetMs','fps','targetDur','overlapSec','snapTh','totalDuration','bible'].forEach(function(id){
+$(id).addEventListener('change',function(){readCfg();renderAll();autosave();});});
+$('mpLang').addEventListener('change',function(){readCfg();updateMpSize();autosave();});
+addEventListener('resize',function(){fitHeader();drawTL();drawPH(curMs());updSB();});
+initTL();initKB();}
+
+var BIBLE_EX={
+es:[
+'MODO DIRECTOR V1 · CONTRATO DE GUION NARRATIVO (ESTA BIBLIA TIENE PRIORIDAD MÁXIMA)',
+'Esta biblia ANULA cualquier instrucción previa que diga "únicos cambios permitidos = rellenar campos creativos", "esqueleto INMUTABLE" o "SIN tocar clips". Trabaja en MODO NARRATIVO: no vienes a describir planos sueltos, vienes a escribir un cortometraje musical. La capa musical (secciones, tiempos, letra, BPM, events, duración total, techConfig, globalConfig) es sagrada; la capa narrativa (scenes, assignments, clips, aesthetics, clipDescriptions, clipAesthetics, universalPrompt, notepad) es TU lienzo y debes reautorizarla por completo.',
+'',
+'1) OBJETIVO NARRATIVO (ESTÁNDAR "B", PROHIBIDO ESTÁNDAR "A")',
+'- No ilustres la letra: AMPLIFÍCALA. Crea una historia paralela que eleve el significado (si la letra dice "cuido mi templo", no dibujes a alguien limpiando un templo: dramatiza qué cuesta construirlo, qué lo amenaza y qué se sacrifica para salvarlo).',
+'- Debe existir CONFLICTO desde los primeros 15 segundos: un peligro, un misterio, una pérdida o una fuerza que observa. Nada de intros instrumentales largas sin personaje ni tensión.',
+'- Debe existir un PROTAGONISTA con arco visible (estado inicial → prueba → transformación), una FUERZA DE OPOSICIÓN (villano redimible, sistema, mirada, destino) y, si encaja, una FUERZA MAYOR impersonal (muerte, tiempo, cosmos) que no se derrota, solo se integra.',
+'- Debe existir al menos UNA IMAGEN ANCLA inolvidable en el clímax (el fotograma que la gente pausa y comparte).',
+'- El final debe tener significado, no solo brillo: se permite (y se recomienda) el cierre agridulce.',
+'- Usa MOTIVOS recurrentes: un objeto/entidad que aparece temprano como pregunta y retorna al final como respuesta (ej.: libro oscuro → libro blanco; ojo vigilante → ojo redimido).',
+'- PROHIBIDO: todos los clips con la misma duración, personajes estáticos que no cambian, mundos genéricos que podrían servir para cualquier canción, relleno contemplativo sin conflicto, y prompts que solo repiten la letra.',
+'',
+'2) JERARQUÍA REAL: SECCIONES → ESCENAS → ASIGNACIONES → CLIPS',
+'- SECCIONES = arquitectura de la canción (intro, estrofas, coros, estribillos, final). Conserva sus tiempos y nombres; enriquece su description con el beat dramático de esa sección.',
+'- ESCENAS = unidades dramáticas. Una escena puede contener VARIOS clips. Dales nombre cinematográfico y description con las líneas que cubre (o "[Instrumental] + evento narrativo"). Usa scenes[].aestheticIdx para fijar el mundo visual de la escena.',
+'- ASIGNACIONES = puentes tiempo↔escena. Cada assignment dice qué escena ocupa qué rango dentro de qué sección.',
+'- CLIPS = fragmentos técnicos de generación (techo duro = Duración Objetivo). La partición de clips que viene en el esqueleto es solo una REFERENCIA rítmica: debes sustituirla por una partición narrativa con duraciones VARIABLES (cortes rápidos en revelaciones/golpes, planos largos en contemplación).',
+'- FIRST-LAST-FRAME: activa config.firstLastFrame=true en una escena cuando su último frame deba encadenar con el primer frame de la escena siguiente (continuidad visual real). Úsalo como recurso narrativo, no por defecto en todas.',
+'',
+'3) REGLAS TÉCNICAS DE LA REAUTORIZACIÓN (OBLIGATORIAS)',
+'- Cobertura 100% de [0, totalDurationMs]: clips consecutivos sin huecos ni solapes (clip[i].endMs === clip[i+1].startMs).',
+'- Ningún clip puede superar D = targetDur*1000 (techo duro por IA de video).',
+'- ids de clip secuenciales 1..N y ordenados por startMs.',
+'- frames = Math.round((endMs-startMs)/1000 * FPS).',
+'- Esquema exacto de cada clip: {id, sectionIdx, sceneId, asnIdx, manual:false, startMs, endMs, genStartMs:startMs, genEndMs:endMs, coreStartMs:startMs+S/2, coreEndMs:endMs-S/2, coreDurMs:(endMs-startMs)-S, genDurMs:endMs-startMs, S, frames, D, firstLastFrame:false, firstFrameFrom:null}.',
+'- asnIdx = índice (base 0) del assignment correspondiente en assignments[]; sceneId = id de su escena. Para un clip de cola instrumental sin escena propia: sceneId:null, asnIdx:null (su prompt vive en clipDescriptions).',
+'- assignments[]: {sceneId, sectionIdx, startMs, endMs, overrides:{}}. Deben ser contiguos y caer dentro de su sección.',
+'- scenes[]: {id, name, description, aestheticIdx, config:{targetDuration:null, overlapSec:null, firstLastFrame:true|false|null, crossFLF:null}}.',
+'- aesthetics[]: [{name, content}]. Crea MUNDOS, no solo paletas (mínimo 6, máximo 12). Cada content describe arquitectura, luz, paleta, textura y reglas del mundo.',
+'- clipAesthetics {"id": idx} solo para excepciones que contradicen la estética de su escena.',
+'- clipDescriptions {"id": prompt} para TODOS los clips, sin excepción.',
+'',
+'4) PROMPTS DE VIDEO (8 BLOQUES + DISCIPLINA DE REFERENCIAS)',
+'Cada prompt usa: [STYLE][SUBJECT&ACTION][ENVIRONMENT][CAMERA][LIGHTING][MOTION/BPM][EXCLUSIONS inline][PARAMS].',
+'- SUBJECT&ACTION cuenta el beat narrativo del clip y cubre el sentido de las líneas de su rango (o el evento si es instrumental).',
+'- refs de personaje = CHARACTER-ONLY: usa la referencia solo para rostro/vestuario/entidad; NUNCA copies el fondo de la imagen de referencia (el entorno lo define el texto). Excepción: si el fondo de la ref coincide con el entorno narrado, puede informar el ambiente, pero el diseño de personaje sigue siendo lo primario.',
+'- EXCLUSIONS inline explícitas y específicas del riesgo de ese clip (no text, no watermark, no deformidades, no arquitectura equivocada, no strobe, no fondos de referencia filtrados).',
+'- Movimiento half-time del BPM, ease-in/ease-out, sin paradas bruscas ni flicker. Cámara estable y deliberada para ocultar artefactos de baja resolución.',
+'- universalPrompt = base técnica global (sin placeholders) y universalPromptTitle = título corto de esa base.',
+'',
+'5) NOTEPAD = BIBLIA DE PRODUCCIÓN (AÑADIR, NUNCA BORRAR LA TABLA NI LA ADVERTENCIA)',
+'Añade al notepad:',
+'- Taxonomía de entidades/personajes (diseño canónico, variantes, reglas de expresión).',
+'- Arco de cada intérprete (dónde empieza, qué prueba supera, dónde termina).',
+'- Mapa de motivos (primera aparición → resolución).',
+'- Mapa de referencias por clip (character-only).',
+'- Orden de generación sugerido: primero 3 clips centinela (el más difícil de personaje, el más difícil de entorno, el de mayor riesgo VFX), luego batches por familias visuales.',
+'- Reglas de pipeline: orientación real de salida, Enhance My Prompt OFF, letterbox solo en post, mitigación de artefactos de baja resolución.',
+'- Cualquier decisión de continuidad importante (FLF, fundidos, colas instrumentales sin pista).',
+'',
+'6) CHECKLIST ANTES DE EMITIR (SI FALLA ALGO, CORRIGE ANTES DE DEVOLVER)',
+'- JSON parsea y es UN SOLO bloque, nada más.',
+'- Capa musical intacta; capa narrativa reautorizada.',
+'- scenes[] y assignments[] NO vacíos; una o más escenas con varios clips.',
+'- Cobertura total, sin clips por encima del techo, frames correctos, ids secuenciales.',
+'- clipDescriptions para todos los ids; sin placeholders ni campos vacíos.',
+'- Hay conflicto temprano, arco de personaje, imagen ancla y final con sentido.',
+'- notepad conserva tabla y advertencia originales + biblia de producción añadida.',
+'- Si el guion parece "A" (clips uniformes, sin conflicto, letra ilustrada, personajes estáticos), REHACÉLO antes de entregar.',
+'',
+'CONTRATO DE SALIDA: devuelve UN SOLO bloque JSON válido con el proyecto COMPLETO. Nada de explicaciones fuera del JSON.'
+].join('\n'),
+en:[
+'AI DIRECTOR MODE V1 · NARRATIVE SCRIPT CONTRACT (THIS BIBLE HAS HIGHEST PRIORITY)',
+'This bible OVERRIDES any previous instruction that says "only allowed changes = filling creative fields", "IMMUTABLE skeleton" or "DO NOT touch clips". Work in NARRATIVE MODE: you are not here to describe loose shots, you are here to write a musical short film. The musical layer (sections, timings, lyrics, BPM, events, total duration, techConfig, globalConfig) is sacred; the narrative layer (scenes, assignments, clips, aesthetics, clipDescriptions, clipAesthetics, universalPrompt, notepad) is YOUR canvas and you must re-author it completely.',
+'',
+'1) NARRATIVE GOAL ("B" STANDARD, "A" STANDARD FORBIDDEN)',
+'- Do not illustrate the lyrics: AMPLIFY them. Create a parallel story that elevates the meaning (if the lyric says "I care for my temple", do not draw someone cleaning a temple: dramatize what it costs to build it, what threatens it and what is sacrificed to save it).',
+'- CONFLICT must exist within the first 15 seconds: a danger, a mystery, a loss or a watching force. No long instrumental intros without a character or tension.',
+'- There must be a PROTAGONIST with a visible arc (initial state → trial → transformation), an OPPOSITION FORCE (redeemable villain, system, gaze, fate) and, if it fits, an impersonal GREATER FORCE (death, time, cosmos) that is not defeated, only integrated.',
+'- There must be at least ONE unforgettable ANCHOR IMAGE at the climax (the frame people pause and share).',
+'- The ending must have meaning, not just glow: a bittersweet ending is allowed (and recommended).',
+'- Use recurring MOTIFS: an object/entity that appears early as a question and returns at the end as an answer (e.g.: dark book → white book; watching eye → redeemed eye).',
+'- FORBIDDEN: all clips with the same duration, static characters who do not change, generic worlds that could fit any song, contemplative filler without conflict, and prompts that only repeat the lyrics.',
+'',
+'2) REAL HIERARCHY: SECTIONS → SCENES → ASSIGNMENTS → CLIPS',
+'- SECTIONS = song architecture (intro, verses, choruses, hooks, outro). Keep their timings and names; enrich their description with the dramatic beat of that section.',
+'- SCENES = dramatic units. A scene may contain SEVERAL clips. Give them a cinematic name and a description with the lines they cover (or "[Instrumental] + narrative event"). Use scenes[].aestheticIdx to set the visual world of the scene.',
+'- ASSIGNMENTS = time↔scene bridges. Each assignment states which scene occupies which range inside which section.',
+'- CLIPS = technical generation fragments (hard ceiling = Target Duration). The clip partition that comes in the skeleton is only a rhythmic REFERENCE: you must replace it with a narrative partition with VARIABLE durations (quick cuts on reveals/hits, long takes on contemplation).',
+'- FIRST-LAST-FRAME: set config.firstLastFrame=true on a scene when its last frame should chain into the first frame of the next scene (real visual continuity). Use it as a narrative device, not by default on all of them.',
+'',
+'3) TECHNICAL RULES OF RE-AUTHORING (MANDATORY)',
+'- 100% coverage of [0, totalDurationMs]: consecutive clips with no gaps or overlaps (clip[i].endMs === clip[i+1].startMs).',
+'- No clip may exceed D = targetDur*1000 (hard ceiling per video AI).',
+'- Sequential clip ids 1..N, sorted by startMs.',
+'- frames = Math.round((endMs-startMs)/1000 * FPS).',
+'- Exact schema of each clip: {id, sectionIdx, sceneId, asnIdx, manual:false, startMs, endMs, genStartMs:startMs, genEndMs:endMs, coreStartMs:startMs+S/2, coreEndMs:endMs-S/2, coreDurMs:(endMs-startMs)-S, genDurMs:endMs-startMs, S, frames, D, firstLastFrame:false, firstFrameFrom:null}.',
+'- asnIdx = index (base 0) of the corresponding assignment in assignments[]; sceneId = id of its scene. For an instrumental tail clip without its own scene: sceneId:null, asnIdx:null (its prompt lives in clipDescriptions).',
+'- assignments[]: {sceneId, sectionIdx, startMs, endMs, overrides:{}}. They must be contiguous and fall inside their section.',
+'- scenes[]: {id, name, description, aestheticIdx, config:{targetDuration:null, overlapSec:null, firstLastFrame:true|false|null, crossFLF:null}}.',
+'- aesthetics[]: [{name, content}]. Create WORLDS, not just palettes (minimum 6, maximum 12). Each content describes architecture, light, palette, texture and rules of the world.',
+'- clipAesthetics {"id": idx} only for exceptions that contradict the aesthetic of their scene.',
+'- clipDescriptions {"id": prompt} for EVERY clip, without exception.',
+'',
+'4) VIDEO PROMPTS (8 BLOCKS + REFERENCE DISCIPLINE)',
+'Each prompt uses: [STYLE][SUBJECT&ACTION][ENVIRONMENT][CAMERA][LIGHTING][MOTION/BPM][EXCLUSIONS inline][PARAMS].',
+'- SUBJECT&ACTION tells the narrative beat of the clip and covers the meaning of the lines in its range (or the event if instrumental).',
+'- character refs = CHARACTER-ONLY: use the reference only for face/wardrobe/entity; NEVER copy the background of the reference image (the environment is defined by the text). Exception: if the ref background matches the narrated environment, it may inform the atmosphere, but character design remains primary.',
+'- Inline EXCLUSIONS explicit and specific to the risk of that clip (no text, no watermark, no deformities, no wrong architecture, no strobe, no leaked reference backgrounds).',
+'- Half-time BPM motion, ease-in/ease-out, no abrupt stops or flicker. Stable, deliberate camera to hide low-resolution artifacts.',
+'- universalPrompt = global technical base (no placeholders) and universalPromptTitle = short title of that base.',
+'',
+'5) NOTEPAD = PRODUCTION BIBLE (APPEND, NEVER DELETE THE TABLE OR THE WARNING)',
+'Append to the notepad:',
+'- Entity/character taxonomy (canonical design, variants, expression rules).',
+'- Arc of each performer (where they start, what trial they overcome, where they end).',
+'- Motif map (first appearance → resolution).',
+'- Per-clip reference map (character-only).',
+'- Suggested generation order: first 3 sentinel clips (the hardest character, the hardest environment, the highest VFX risk), then batches by visual families.',
+'- Pipeline rules: real output orientation, Enhance My Prompt OFF, letterbox in post only, low-resolution artifact mitigation.',
+'- Any important continuity decision (FLF, fades, instrumental tails without track).',
+'',
+'6) CHECKLIST BEFORE OUTPUT (IF ANYTHING FAILS, FIX IT BEFORE RETURNING)',
+'- JSON parses and is ONE single block, nothing else.',
+'- Musical layer intact; narrative layer re-authored.',
+'- scenes[] and assignments[] NOT empty; one or more scenes with several clips.',
+'- Total coverage, no clips above the ceiling, correct frames, sequential ids.',
+'- clipDescriptions for all ids; no placeholders or empty fields.',
+'- Early conflict, character arc, anchor image and meaningful ending exist.',
+'- notepad keeps the original table and warning + appended production bible.',
+'- If the script looks like "A" (uniform clips, no conflict, illustrated lyrics, static characters), REDO it before delivering.',
+'',
+'OUTPUT CONTRACT: return ONE single valid JSON block with the COMPLETE project. No explanations outside the JSON.'
+].join('\n')
+};
+function loadBibleExample(){var s2=snapState();
+var tx=BIBLE_EX[LANG]||BIBLE_EX.es;
+$('bible').value=($('bible').value.trim()?$('bible').value.trim()+'\n\n':'')+tx;
+P.bible=$('bible').value;pushUndoSnap(s2,'bible');autosave();toast('🎬 '+L('Modo Director V1 cargado','Director Mode V1 loaded'));}
+
+function init(){var fails=[];
+function stage(name,fn){try{fn();}catch(e){fails.push(name+' → '+e.message);
+if(window.console)console.error('[Puente]',name,e);pushNotif('⚠ boot '+name+': '+e.message,'err');}}
+stage('session',restoreSession);
+stage('tabs',function(){buildTabs();activateTab(curTab||'cfg');});
+stage('cfg',writeCfg);
+stage('events',initEv);
+stage('render',renderAll);
+stage('lang',applyLang);
+stage('theme',applyTheme);
+stage('header',fitHeader);
+stage('footer',function(){var f=document.querySelector('footer');if(f)f.textContent+=' · build '+window.__LB_BUILD;});
+if(fails.length){var be=$('bootErr');
+be.textContent='⚠ '+L('Módulos con fallo al arrancar (la app sigue usable):','Modules failed at boot (app remains usable):')+'\n• '+fails.join('\n• ')+'\n'+L('Abre 📤 Exportar y pulsa 🧪 Self-Test.','Open 📤 Export and press 🧪 Self-Test.');
+be.classList.add('show');toast(t('toast.boot'),'err');}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+window.__LB_OK=true;
+</script>
+</body>
+</html>
